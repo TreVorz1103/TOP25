@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>เกมโชว์ - เฉลย</title>
 
-<!-- ฟอนต์ Mitr -->
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -108,17 +107,10 @@ h1{
   border:1px solid rgba(255,255,255,0.2);
   font-family:"Mitr",sans-serif;
 }
-#backBtn{
-  background:#333;
-  color:#fff;
-}
-#resetBtn{
-  background:transparent;
-  color:#cbd5e1;
-}
-#backBtn:hover,#resetBtn:hover{
-  opacity:0.8;
-}
+#backBtn{background:#333;color:#fff;}
+#resetBtn{background:transparent;color:#cbd5e1;}
+#backBtn:hover,#resetBtn:hover{opacity:0.8;}
+
 table{
   width:100%;
   border-collapse:collapse;
@@ -126,7 +118,6 @@ table{
   background:rgba(255,255,255,0.06);
   border-radius:10px;
   overflow:hidden;
-  font-family:"Mitr",sans-serif;
 }
 th,td{
   padding:10px;
@@ -138,9 +129,32 @@ th{
   color:var(--accent);
   font-weight:600;
 }
-td:first-child{
-  font-weight:600;
+td:first-child{font-weight:600;}
+
+#saveContainer{
+  text-align:center;
+  margin-top:20px;
 }
+#gameSelect{
+  font-size:18px;
+  padding:8px 12px;
+  border-radius:8px;
+  border:none;
+  font-family:"Mitr",sans-serif;
+  margin-right:10px;
+}
+#saveBtn{
+  font-size:18px;
+  background:var(--accent);
+  color:#05245a;
+  font-weight:700;
+  border:none;
+  padding:10px 20px;
+  border-radius:10px;
+  cursor:pointer;
+}
+#saveBtn:hover{opacity:0.9;}
+
 #downloadBtn{
   display:block;
   margin:20px auto;
@@ -153,9 +167,7 @@ td:first-child{
   cursor:pointer;
   font-family:"Mitr",sans-serif;
 }
-#downloadBtn:hover{
-  opacity:0.9;
-}
+#downloadBtn:hover{opacity:0.9;}
 </style>
 </head>
 <body>
@@ -165,6 +177,20 @@ td:first-child{
   <div id="status">กำลังโหลดข้อมูลคำตอบ...</div>
   <div id="results" class="results"></div>
   <div id="scoreTable"></div>
+
+  <!-- 🔽 พื้นที่สำหรับเลือกเกมและบันทึก -->
+  <div id="saveContainer" style="display:none;">
+    <select id="gameSelect">
+      <option value="">-- เลือกเกมที่จะบันทึก --</option>
+      <option value="เกมที่ 1">เกมที่ 1</option>
+      <option value="เกมที่ 2">เกมที่ 2</option>
+      <option value="เกมที่ 3">เกมที่ 3</option>
+      <option value="เกมที่ 4">เกมที่ 4</option>
+      <option value="เกมที่ 5">เกมที่ 5</option>
+    </select>
+    <button id="saveBtn">💾 บันทึกคะแนน</button>
+  </div>
+
   <div id="downloadContainer" style="text-align:center;"></div>
 
   <div class="bottom-btns">
@@ -186,6 +212,9 @@ const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
 const scoreTable=document.getElementById('scoreTable');
 const downloadContainer=document.getElementById('downloadContainer');
+const saveContainer=document.getElementById('saveContainer');
+const saveBtn=document.getElementById('saveBtn');
+const gameSelect=document.getElementById('gameSelect');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
 const pageTitle=document.getElementById('pageTitle');
@@ -196,14 +225,12 @@ backBtn.addEventListener('click',()=>{
     location.href='index.html';
   }
 });
-
 resetBtn.addEventListener('click',()=>{
   results.innerHTML='';
   scoreTable.innerHTML='';
   downloadContainer.innerHTML='';
+  saveContainer.style.display='none';
   btn.style.display='block';
-  results.style.display='block';
-  pageTitle.textContent='เฉลยผลลัพธ์';
   pageTitle.style.display='block';
 });
 
@@ -262,19 +289,13 @@ btn.addEventListener('click',async()=>{
       }
     `;
     results.appendChild(card);
-    await wait(1000);
+    await wait(300);
   }
-
-  await wait(2000);
-
-  results.style.display = 'none';
-  pageTitle.style.display = 'none';
 
   const scoreData = groupScores
     .map((s,i)=>({group:i+1,score:s}))
-    .filter(g=>g.score>0);
-
-  scoreData.sort((a,b)=>b.score - a.score || a.group - b.group);
+    .filter(g=>g.score>0)
+    .sort((a,b)=>b.score - a.score || a.group - b.group);
 
   let tableHTML = `
     <table>
@@ -291,39 +312,37 @@ btn.addEventListener('click',async()=>{
     ${tableHTML}
   `;
 
-  // ✅ ให้ผู้ใช้เลือกว่าจะบันทึกลง "เกมที่" ไหน
-  const gameName = prompt("กรุณาเลือกช่องเกมที่จะบันทึกคะแนน (เช่น เกมที่ 1, เกมที่ 2, เกมที่ 3):");
-  if (gameName) {
-    const SHEET_URL = "https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec"; // <--- วางลิงก์ Web App ของคุณที่นี่
-    fetch(SHEET_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        game: gameName,
-        scores: scoreData
-      })
-    }).then(() => {
-      alert("✅ บันทึกคะแนนลง Google Sheet สำเร็จ");
-    }).catch(err => {
-      alert("❌ เกิดข้อผิดพลาดในการบันทึกคะแนน");
-      console.error(err);
-    });
-  }
+  // ✅ แสดงปุ่มบันทึกและตัวเลือกเกม
+  saveContainer.style.display='block';
 
-  // ✅ เพิ่มปุ่มดาวน์โหลดไฟล์ .txt
+  // ✅ ปุ่มดาวน์โหลดไฟล์ .txt
   const textLines = scoreData.map((r,idx)=>`อันดับที่ ${idx+1} - กลุ่มที่ ${r.group} : ${r.score} คะแนน`);
   const blob = new Blob([textLines.join('\n')], { type: 'text/plain;charset=utf-8' });
   const url = URL.createObjectURL(blob);
-
   downloadContainer.innerHTML = `<button id="downloadBtn">📄 ดาวน์โหลดผลคะแนน (.txt)</button>`;
-  const downloadBtn = document.getElementById('downloadBtn');
-  downloadBtn.addEventListener('click', () => {
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'ผลคะแนน.txt';
+  document.getElementById('downloadBtn').addEventListener('click', () => {
+    const a=document.createElement('a');
+    a.href=url;a.download='ผลคะแนน.txt';
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  // ✅ เมื่อกดปุ่มบันทึก
+  saveBtn.addEventListener('click',()=>{
+    const gameName=gameSelect.value;
+    if(!gameName){alert('กรุณาเลือกเกมก่อนบันทึก');return;}
+    const SHEET_URL="https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec"; // แทนด้วย URL ของ Google Script
+    fetch(SHEET_URL,{
+      method:"POST",
+      mode:"no-cors",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({game:gameName,scores:scoreData})
+    }).then(()=>{
+      alert(`✅ บันทึกคะแนนลง Google Sheet สำเร็จ (${gameName})`);
+    }).catch(err=>{
+      alert("❌ เกิดข้อผิดพลาดในการบันทึกคะแนน");
+      console.error(err);
+    });
   });
 });
 </script>
