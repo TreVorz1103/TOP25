@@ -1,269 +1,218 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เฉลยคำตอบ | เกมตอบคำถาม</title>
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --text: #fff;
-      --accent: #00c3ff;
-      --card: #141414;
-      --success: #00ff99;
-      --fail: #ff5555;
-    }
-    body {
-      font-family: "Prompt", sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      font-size: 26px;
-      color: var(--accent);
-      margin-bottom: 20px;
-    }
-    button {
-      background: var(--accent);
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 18px;
-      cursor: pointer;
-      margin: 5px;
-      color: #000;
-      font-weight: 600;
-    }
-    button:hover { opacity: 0.9; }
-    .card-result {
-      background: var(--card);
-      border-radius: 12px;
-      padding: 15px;
-      margin: 10px auto;
-      width: 90%;
-      max-width: 500px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 0 8px rgba(255,255,255,0.1);
-      transition: transform .2s;
-    }
-    .card-result:hover { transform: scale(1.02); }
-    .rank-badge {
-      background: var(--success);
-      color: #000;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    .notfound {
-      background: var(--fail);
-      color: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-    #results, #scoreTable { margin-top: 20px; }
-    table {
-      width: 90%;
-      margin: 20px auto;
-      border-collapse: collapse;
-    }
-    th, td {
-      border: 1px solid #444;
-      padding: 10px;
-      font-size: 16px;
-    }
-    th {
-      background: var(--accent);
-      color: #000;
-    }
-    #saveContainer { display: none; margin-top: 20px; }
-    #downloadContainer { margin-top: 15px; }
-    select {
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>เฉลยคำตอบ | เกมตอบคำถาม</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #012a66;
+  --card: #0a3d91;
+  --highlight: #ffd400;
+  --accent: #ffef99;
+  --text: #ffffff;
+  --correct: #36ffb0;
+  --wrong: #ff6262;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  font-family: "Mitr", sans-serif;
+  background: linear-gradient(180deg, var(--bg), #021c46);
+  color: var(--text);
+  text-align: center;
+}
+
+h1 {
+  color: var(--highlight);
+  text-shadow: 2px 2px 0 #000;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+button {
+  background: var(--highlight);
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+  color: #012a66;
+  font-weight: 700;
+  margin: 5px;
+  transition: transform 0.15s;
+}
+button:hover { transform: scale(1.05); }
+
+.card-result {
+  background: var(--card);
+  border: 3px solid var(--highlight);
+  border-radius: 16px;
+  padding: 15px 20px;
+  margin: 15px auto;
+  width: 90%;
+  max-width: 600px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+  color: var(--text);
+  font-size: 18px;
+}
+
+.rank-badge {
+  background: var(--highlight);
+  color: #012a66;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: bold;
+  text-align: center;
+  min-width: 90px;
+}
+.notfound {
+  background: var(--wrong);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: bold;
+  min-width: 90px;
+}
+
+#results, #scoreTable { margin-top: 25px; }
+
+table {
+  width: 90%;
+  margin: 20px auto;
+  border-collapse: collapse;
+  background: #e9f2ff;
+  color: #012a66;
+  border-radius: 12px;
+  overflow: hidden;
+}
+th, td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  font-size: 17px;
+}
+th {
+  background: var(--highlight);
+  color: #012a66;
+}
+
+#saveContainer {
+  display: none;
+  margin-top: 20px;
+}
+
+select {
+  padding: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--highlight);
+  background: #e9f2ff;
+  color: #012a66;
+  font-size: 16px;
+  margin-right: 10px;
+}
+
+#downloadContainer {
+  margin-top: 15px;
+}
+</style>
 </head>
 <body>
-  <h1 id="pageTitle">🏆 เฉลยคำตอบแต่ละกลุ่ม 🏆</h1>
-  <div>
-    <button id="backBtn">⬅️ กลับหน้าแรก</button>
-    <button id="resetBtn">🔄 รีเซ็ต</button>
-  </div>
-  <div>
-    <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
-  </div>
-  <div id="status" style="display:none; margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
-  <div id="results"></div>
-  <div id="scoreTable"></div>
-  <div id="saveContainer">
-    <select id="gameSelect">
-      <option value="">-- เลือกเกมที่จะบันทึก --</option>
-      <option value="เกมที่ 1">เกมที่ 1</option>
-      <option value="เกมที่ 2">เกมที่ 2</option>
-      <option value="เกมที่ 3">เกมที่ 3</option>
-    </select>
-    <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
-  </div>
-  <div id="downloadContainer"></div>
+<h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
 
-  <script>
-    function wait(ms){return new Promise(res=>setTimeout(res,ms));}
-    function norm(s){return (s||'').toLowerCase().trim();}
-    function escapeHtml(s){return s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
+<div>
+  <button id="backBtn">⬅️ กลับหน้าแรก</button>
+  <button id="resetBtn">🔄 รีเซ็ต</button>
+</div>
 
-    const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
-    const answers=JSON.parse(localStorage.getItem('answers')||'[]');
+<div><button id="checkBtn">📋 แสดงเฉลยคำตอบ</button></div>
+<div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
+<div id="results"></div>
+<div id="scoreTable"></div>
+<div id="saveContainer">
+  <select id="gameSelect">
+    <option value="">-- เลือกเกมที่จะบันทึก --</option>
+    <option value="เกมที่ 1">เกมที่ 1</option>
+    <option value="เกมที่ 2">เกมที่ 2</option>
+    <option value="เกมที่ 3">เกมที่ 3</option>
+  </select>
+  <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
+</div>
+<div id="downloadContainer"></div>
 
-    const btn=document.getElementById('checkBtn');
-    const statusEl=document.getElementById('status');
-    const results=document.getElementById('results');
-    const scoreTable=document.getElementById('scoreTable');
-    const downloadContainer=document.getElementById('downloadContainer');
-    const saveContainer=document.getElementById('saveContainer');
-    const saveBtn=document.getElementById('saveBtn');
-    const gameSelect=document.getElementById('gameSelect');
-    const backBtn=document.getElementById('backBtn');
-    const resetBtn=document.getElementById('resetBtn');
-    const pageTitle=document.getElementById('pageTitle');
+<script>
+function wait(ms){return new Promise(res=>setTimeout(res,ms));}
+function norm(s){return (s||'').toLowerCase().trim();}
+function escapeHtml(s){return s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
-    backBtn.addEventListener('click',()=>{
-      if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){
-        localStorage.clear();
-        location.href='index.html';
-      }
-    });
-    resetBtn.addEventListener('click',()=>{
-      results.innerHTML='';
-      scoreTable.innerHTML='';
-      downloadContainer.innerHTML='';
-      saveContainer.style.display='none';
-      btn.style.display='block';
-      pageTitle.style.display='block';
-    });
+const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
+const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
-    btn.addEventListener('click',async()=>{
-      if(!ranks.length||!answers.length){
-        alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');
-        return;
-      }
+const btn=document.getElementById('checkBtn');
+const statusEl=document.getElementById('status');
+const results=document.getElementById('results');
+const scoreTable=document.getElementById('scoreTable');
+const downloadContainer=document.getElementById('downloadContainer');
+const saveContainer=document.getElementById('saveContainer');
+const saveBtn=document.getElementById('saveBtn');
+const gameSelect=document.getElementById('gameSelect');
+const backBtn=document.getElementById('backBtn');
+const resetBtn=document.getElementById('resetBtn');
+const pageTitle=document.getElementById('pageTitle');
 
-      btn.style.display='none';
-      statusEl.style.display='block';
-      await wait(2000);
-      statusEl.style.display='none';
+backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
+resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';downloadContainer.innerHTML='';saveContainer.style.display='none';btn.style.display='block';pageTitle.style.display='block';});
 
-      const map=new Map();
-      ranks.forEach((r,i)=>map.set(norm(r),i+1));
+btn.addEventListener('click',async()=>{
+  if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
+  btn.style.display='none';statusEl.style.display='block';await wait(2000);statusEl.style.display='none';
+  const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
+  let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
+  resultData.sort((a,b)=>{if(a.rank===null&&b.rank!==null)return-1;if(a.rank!==null&&b.rank===null)return 1;if(a.rank===null&&b.rank===null)return a.group-b.group;return a.rank-b.rank;});
+  results.innerHTML='';const groupScores=Array(answers.length).fill(0);
+  for(const r of resultData){groupScores[r.group-1]+=r.score;
+    const card=document.createElement('div');
+    card.className='card-result';
+    card.innerHTML=`
+      <div>
+        <div style="font-size:20px;font-weight:600">${escapeHtml(r.text)}</div>
+        <div style="font-size:14px;color:#ddd">คำตอบของกลุ่มที่ ${r.group} — ${r.rank?'พบใน 25 อันดับ':'ไม่พบใน 25 อันดับ'}</div>
+      </div>
+      ${r.rank?`<div class="rank-badge">ที่ ${r.rank}<br><span style="font-size:13px">+${r.score} คะแนน</span></div>`:`<div class="notfound">❌ ไม่พบ<br><span style="font-size:13px">+0 คะแนน</span></div>`}
+    `;
+    results.appendChild(card);await wait(300);
+  }
 
-      let resultData=answers.map((t,i)=>({
-        text:t,
-        rank:map.get(norm(t))||null,
-        group:i+1,
-        score:map.get(norm(t))||0
-      })).filter(r=>r.text.trim()!=="");
+  await wait(1500);
+  results.style.display='none';pageTitle.style.display='none';
+  const scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
+  let tableHTML=`<table><thead><tr><th>อันดับ</th><th>กลุ่มที่</th><th>คะแนนรวม</th></tr></thead><tbody>`;
+  scoreData.forEach((r,idx)=>{tableHTML+=`<tr><td>${idx+1}</td><td>${r.group}</td><td>${r.score}</td></tr>`;});
+  tableHTML+=`</tbody></table>`;
+  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:30px;">🏆 สรุปผลคะแนน 🏆</h2>${tableHTML}`;
+  saveContainer.style.display='block';
 
-      resultData.sort((a,b)=>{
-        if(a.rank===null && b.rank!==null) return -1;
-        if(a.rank!==null && b.rank===null) return 1;
-        if(a.rank===null && b.rank===null) return a.group - b.group;
-        return a.rank - b.rank;
-      });
+  const textLines=scoreData.map((r,idx)=>`อันดับที่ ${idx+1} - กลุ่มที่ ${r.group} : ${r.score} คะแนน`);
+  const blob=new Blob([textLines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  downloadContainer.innerHTML=`<button id="downloadBtn">📄 ดาวน์โหลดผลคะแนน (.txt)</button>`;
+  document.getElementById('downloadBtn').addEventListener('click',()=>{const a=document.createElement('a');a.href=url;a.download='ผลคะแนน.txt';a.click();URL.revokeObjectURL(url);});
 
-      results.innerHTML='';
-      const groupScores = Array(answers.length).fill(0);
-
-      for(const r of resultData){
-        groupScores[r.group-1] += r.score;
-        const card=document.createElement('div');
-        card.className='card-result';
-        card.innerHTML=`
-          <div>
-            <div style="font-size:20px;font-weight:600">${escapeHtml(r.text)}</div>
-            <div style="font-size:14px;color:#ccc">
-              คำตอบของกลุ่มที่ ${r.group} — ${r.rank ? 'พบใน 25 อันดับ' : 'ไม่พบใน 25 อันดับ'}
-            </div>
-          </div>
-          ${
-            r.rank
-              ? `<div class="rank-badge">
-                  <div>ที่ ${r.rank}</div>
-                  <div style="font-size:13px">+${r.score} คะแนน</div>
-                </div>`
-              : `<div class="notfound">
-                  <div>❌ ไม่พบ</div>
-                  <div style="font-size:13px">+0 คะแนน</div>
-                </div>`
-          }
-        `;
-        results.appendChild(card);
-        await wait(300);
-      }
-
-      // ✅ หน่วงเวลา 1.5 วินาที ก่อนแสดงตารางคะแนน
-      await wait(1500);
-      results.style.display='none';
-      pageTitle.style.display='none';
-
-      const scoreData = groupScores
-        .map((s,i)=>({group:i+1,score:s}))
-        .filter(g=>g.score>0)
-        .sort((a,b)=>b.score - a.score || a.group - b.group);
-
-      let tableHTML = `
-        <table>
-          <thead><tr><th>อันดับ</th><th>กลุ่มที่</th><th>คะแนนรวม</th></tr></thead>
-          <tbody>
-      `;
-      scoreData.forEach((r,idx)=>{
-        tableHTML += `<tr><td>${idx+1}</td><td>${r.group}</td><td>${r.score}</td></tr>`;
-      });
-      tableHTML += `</tbody></table>`;
-
-      scoreTable.innerHTML = `
-        <h2 style="text-align:center;color:var(--accent);margin-top:30px;">🏆 สรุปผลคะแนน 🏆</h2>
-        ${tableHTML}
-      `;
-
-      saveContainer.style.display='block';
-
-      // ✅ ปุ่มดาวน์โหลดไฟล์ .txt
-      const textLines = scoreData.map((r,idx)=>`อันดับที่ ${idx+1} - กลุ่มที่ ${r.group} : ${r.score} คะแนน`);
-      const blob = new Blob([textLines.join('\n')], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      downloadContainer.innerHTML = `<button id="downloadBtn">📄 ดาวน์โหลดผลคะแนน (.txt)</button>`;
-      document.getElementById('downloadBtn').addEventListener('click', () => {
-        const a=document.createElement('a');
-        a.href=url;a.download='ผลคะแนน.txt';
-        a.click();
-        URL.revokeObjectURL(url);
-      });
-
-      saveBtn.addEventListener('click',()=>{
-        const gameName=gameSelect.value;
-        if(!gameName){alert('กรุณาเลือกเกมก่อนบันทึก');return;}
-        const SHEET_URL="https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec";
-        fetch(SHEET_URL,{
-          method:"POST",
-          mode:"no-cors",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({game:gameName,scores:scoreData})
-        }).then(()=>{
-          alert(`✅ บันทึกคะแนนลง Google Sheet สำเร็จ (${gameName})`);
-        }).catch(err=>{
-          alert("❌ เกิดข้อผิดพลาดในการบันทึกคะแนน");
-          console.error(err);
-        });
-      });
-    });
-  </script>
+  saveBtn.addEventListener('click',()=>{
+    const gameName=gameSelect.value;
+    if(!gameName){alert('กรุณาเลือกเกมก่อนบันทึก');return;}
+    const SHEET_URL="https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec";
+    fetch(SHEET_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"application/json"},body:JSON.stringify({game:gameName,scores:scoreData})})
+      .then(()=>alert(`✅ บันทึกคะแนนลง Google Sheet สำเร็จ (${gameName})`))
+      .catch(err=>{alert("❌ เกิดข้อผิดพลาดในการบันทึกคะแนน");console.error(err);});
+  });
+});
+</script>
 </body>
 </html>
