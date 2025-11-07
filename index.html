@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TOP 25</title>
 
-<!-- ฟอนต์ Mitr -->
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -72,8 +71,9 @@ button{
   color:#05245a;
   display:block;
   margin:20px auto 0;
+  transition:transform .1s ease;
 }
-button:hover{opacity:0.9;}
+button:hover{opacity:0.9;transform:scale(1.02);}
 .toggle{
   display:inline-block;
   margin-top:10px;
@@ -81,14 +81,18 @@ button:hover{opacity:0.9;}
   color:#cbd5e1;
   cursor:pointer;
 }
-#answersArea{
-  margin-top:30px;
+#answersArea{margin-top:30px;}
+#footer{
+  text-align:center;
+  color:#ccc;
+  margin-top:20px;
+  font-size:13px;
 }
 </style>
 </head>
 <body>
 <div class="stage">
-  <h1>TOP 25</h1>
+  <h1>🧠 TOP 25 เกมโชว์</h1>
 
   <label>ใส่ข้อมูล 25 อันดับ (ใส่ทีละบรรทัด):</label>
   <textarea id="ranks" placeholder="อันดับที่ 1 ถึง 25..."></textarea>
@@ -99,17 +103,19 @@ button:hover{opacity:0.9;}
     <div class="grid" id="answersGrid"></div>
   </div>
 
-  <button id="nextBtn">ไปหน้าถัดไป (เฉลย)</button>
+  <button id="nextBtn">➡️ ไปหน้าถัดไป (เฉลย)</button>
+  <div id="footer">v1.1 | พัฒนาโดย ChatGPT</div>
 </div>
 
 <script>
 const grid=document.getElementById('answersGrid');
 for(let i=1;i<=18;i++){
   const div=document.createElement('div');
-  div.innerHTML=`<label>คำตอบของกลุ่มที่ ${i}</label><input id="ans${i}" type="text" placeholder="คำตอบของกลุ่มที่ ${i}">`;
+  div.innerHTML=`<label>กลุ่มที่ ${i}</label><input id="ans${i}" type="text" placeholder="คำตอบของกลุ่ม ${i}">`;
   grid.appendChild(div);
 }
 
+// 🔒 ซ่อน/แสดงเฉลย
 const ranksArea=document.getElementById('ranks');
 const toggleRanks=document.getElementById('toggleRanks');
 let hidden=false;
@@ -119,16 +125,32 @@ toggleRanks.addEventListener('click',()=>{
   toggleRanks.textContent=hidden?'🔓 แสดงเฉลย':'🔒 ซ่อนเฉลย';
 });
 
+// ▶️ ปุ่มไปหน้าถัดไป
 document.getElementById('nextBtn').addEventListener('click',()=>{
   const ranks=document.getElementById('ranks').value.trim();
   const answers=[];
   for(let i=1;i<=18;i++){
     answers.push(document.getElementById('ans'+i).value.trim());
   }
+
   if(!ranks){alert('กรุณาใส่ข้อมูล 25 อันดับ');return;}
+
+  // ✅ เก็บข้อมูลไว้ใน localStorage
   localStorage.setItem('ranks',ranks);
   localStorage.setItem('answers',JSON.stringify(answers));
-  location.href='result.html';
+
+  // ✅ ตรวจว่ามี result.html หรือไม่
+  fetch('result.html',{method:'HEAD'})
+    .then(res=>{
+      if(res.ok){
+        location.href='result.html';
+      }else{
+        alert('⚠️ ไม่พบไฟล์ result.html ในโฟลเดอร์เดียวกัน');
+      }
+    })
+    .catch(()=>{
+      alert('⚠️ ไม่พบไฟล์ result.html (ตรวจสอบชื่อไฟล์ให้ถูกต้อง)');
+    });
 });
 </script>
 </body>
