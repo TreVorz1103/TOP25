@@ -2,9 +2,8 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>เฉลยคำตอบ | เกมตอบคำถาม</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+<title>TOP25</title>
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -21,9 +20,11 @@ body {
   background: linear-gradient(180deg, var(--bg1), var(--bg2));
   font-family: "Mitr", sans-serif; color: var(--text);
   overflow: hidden;
+  padding: 10px;
 }
 .container {
-  width: 90vw; height: 90vh;
+  width: 100%; max-width: 900px;
+  height: 90vh;
   background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
@@ -34,15 +35,14 @@ body {
 h1 {
   color: var(--highlight);
   text-shadow: 2px 2px 0 #000;
-  font-size: 2.5em;
+  font-size: 2em;
   text-align: center;
-  margin-bottom: 20px;
-  transition: opacity 0.5s ease;
+  margin-bottom: 15px;
 }
 button {
   background: var(--highlight); color: #05245a;
   border: none; border-radius: 10px;
-  padding: 12px 22px; font-size: 18px; font-weight: 700;
+  padding: 12px 20px; font-size: 16px; font-weight: 700;
   cursor: pointer; margin: 8px;
   transition: transform 0.15s;
 }
@@ -57,8 +57,8 @@ button:hover { transform: scale(1.05); }
   border: 2px solid var(--highlight);
   border-radius: 15px;
   padding: 12px 20px;
-  margin: 10px auto;
-  width: 95%; max-width: 800px;
+  margin: 8px auto;
+  width: 100%;
   display: flex; justify-content: space-between; align-items: center;
   opacity: 0; transform: translateY(20px);
   transition: opacity 0.4s ease, transform 0.4s ease;
@@ -67,12 +67,10 @@ button:hover { transform: scale(1.05); }
 .rank-badge {
   background: var(--highlight); color: #012a66;
   padding: 8px 12px; border-radius: 10px;
-  font-weight: bold; min-width: 80px; text-align: center;
+  font-weight: bold; min-width: 70px; text-align: center;
 }
-.notfound {
-  background: #ff4f4f !important;
-  color: #fff !important;
-}
+.notfound { background: #ff4f4f !important; color: #fff !important; }
+
 #results, #scoreTable { width: 100%; text-align: center; margin-top: 20px; }
 #saveContainer { display: none; margin-top: 25px; flex-direction: column; align-items: center; }
 #footerButtons {
@@ -80,7 +78,7 @@ button:hover { transform: scale(1.05); }
   gap: 15px; margin-top: 20px;
 }
 
-/* 🏆 Leaderboard Popup */
+/* Leaderboard Popup */
 #leaderboardPopup {
   display: none;
   position: fixed;
@@ -95,85 +93,73 @@ button:hover { transform: scale(1.05); }
   background: var(--bg1);
   border: 4px solid var(--highlight);
   border-radius: 20px;
-  padding: 30px;
+  padding: 25px;
   text-align: center;
   width: 90%; max-width: 500px;
   box-shadow: 0 0 25px rgba(255,255,255,0.3);
   animation: slideUp 0.4s ease;
 }
 @keyframes slideUp { from { transform: translateY(50px); opacity:0; } to { transform: translateY(0); opacity:1; } }
-#leaderboardBox h2 { color: var(--highlight); margin-bottom: 10px; }
-#leaderboardBox img { width: 150px; margin-bottom: 15px; }
 .leader-item {
   background: var(--highlight);
   color: #012a66;
   margin: 6px auto;
   padding: 10px 20px;
   border-radius: 10px;
-  width: 80%;
+  width: 90%;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 18px;
   display: flex;
   justify-content: space-between;
 }
-#closeLeaderboard {
-  background: #fff; color: #05245a;
-  margin-top: 15px;
-}
+#closeLeaderboard { background: #fff; color: #05245a; margin-top: 15px; }
 
-/* 🟦 สรุปผลคะแนน (เต็มกรอบและไล่สี) */
+/* Score Card */
 .score-card {
   background: linear-gradient(180deg, #1d4f9e 0%, #0f3a7a 100%);
   border: 4px solid var(--highlight);
   border-radius: 30px;
-  padding: 40px 30px;
+  padding: 30px 20px;
   margin: 30px auto;
-  width: 95%;
-  max-width: none;
+  width: 100%;
   box-shadow: 0 0 40px rgba(255, 255, 255, 0.25);
   text-align: center;
-  color: var(--text);
   animation: scorePop 0.5s ease;
 }
 .score-card h2 {
   color: var(--highlight);
   text-shadow: 2px 2px 0 #000;
-  font-size: 2.6em;
+  font-size: 2em;
   font-weight: 700;
   margin-bottom: 20px;
 }
 .score-card table {
   width: 100%;
   border-collapse: collapse;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
   border: 3px solid var(--highlight);
   border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 0 25px rgba(255,255,255,0.25);
 }
 .score-card th, .score-card td {
   border: 1px solid rgba(255,255,255,0.25);
-  padding: 18px 25px;
-  font-size: 24px;
-  text-align: center;
+  padding: 12px 8px;
+  font-size: 18px;
 }
 .score-card th {
   background: var(--highlight);
   color: #05245a;
   font-weight: 800;
-  text-shadow: 1px 1px 0 #fff;
 }
-.score-card tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.08);
-}
-.score-card tr:hover {
-  background: rgba(255, 255, 255, 0.18);
-  transition: background 0.3s ease;
-}
-@keyframes scorePop {
-  from { opacity: 0; transform: translateY(30px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+.score-card tr:nth-child(even){background:rgba(255,255,255,0.08);}
+@keyframes scorePop { from{opacity:0;transform:translateY(30px);} to{opacity:1;transform:translateY(0);} }
+
+/* 📱 Responsive */
+@media(max-width:768px){
+  h1{font-size:1.5em;}
+  .card-result{flex-direction:column;align-items:flex-start;}
+  .rank-badge{margin-top:8px;}
+  .leader-item{font-size:16px;}
+  button{width:100%;max-width:260px;}
 }
 </style>
 </head>
@@ -203,17 +189,16 @@ button:hover { transform: scale(1.05); }
   </div>
 </div>
 
-<!-- 🏆 Leaderboard Popup -->
+<!-- Leaderboard Popup -->
 <div id="leaderboardPopup">
   <div id="leaderboardBox">
-    <img src="podium.png" alt="podium">
+    <img src="podium.png" alt="podium" width="120">
     <h2>🏅 TOP 5 LEADERBOARD 🏅</h2>
     <div id="leaderboardList"></div>
     <button id="closeLeaderboard">ปิด</button>
   </div>
 </div>
 
-<!-- 🔊 preload เสียง -->
 <audio id="soundCorrect" src="Ding.mp3" preload="auto"></audio>
 <audio id="soundWrong" src="Worng.mp3" preload="auto"></audio>
 
@@ -224,15 +209,10 @@ function escapeHtml(s){return (s||'').replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt
 
 const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
-
 const soundCorrect=document.getElementById('soundCorrect');
 const soundWrong=document.getElementById('soundWrong');
-document.body.addEventListener('click',()=>{
-  soundCorrect.play().catch(()=>{});soundCorrect.pause();
-  soundWrong.play().catch(()=>{});soundWrong.pause();
-},{once:true});
+document.body.addEventListener('click',()=>{soundCorrect.play().catch(()=>{});soundCorrect.pause();soundWrong.play().catch(()=>{});soundWrong.pause();},{once:true});
 
-const btn=document.getElementById('checkBtn');
 const results=document.getElementById('results');
 const statusEl=document.getElementById('status');
 const scoreSection=document.getElementById('scoreSection');
@@ -248,76 +228,67 @@ const closeLeaderboard=document.getElementById('closeLeaderboard');
 
 let scoreData=[];
 
-function goHome(){ if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){ localStorage.clear(); location.href='index.html'; } }
-function resetPage(){ location.reload(); }
-
+function goHome(){if(confirm('กลับไปหน้าแรกและล้างข้อมูลหรือไม่?')){localStorage.clear();location.href='index.html';}}
+function resetPage(){location.reload();}
 document.getElementById('backBtn').onclick=goHome;
 document.getElementById('backBtnBottom').onclick=goHome;
 document.getElementById('resetBtn').onclick=resetPage;
 document.getElementById('resetBtnBottom').onclick=resetPage;
 
-btn.onclick=async()=>{
+document.getElementById('checkBtn').onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
-  
+  statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
-  let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
-
+  const resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
-  const notFound=resultData.filter(r=>!r.rank);
-  const ranked=resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
-  resultData=[...notFound,...ranked];
-
   for(const r of resultData){
     groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
-    card.innerHTML=`
-      <div>
-        <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
-        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
-      </div>
-      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
-    `;
+    card.innerHTML=`<div><div style="font-weight:600">${escapeHtml(r.text)}</div>
+      <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank?'ติด TOP 25':'ไม่ติด'}</div></div>
+      ${r.rank?`<div class="rank-badge">อันดับ ${r.rank}</div>`:`<div class="rank-badge notfound">❌</div>`}`;
     results.appendChild(card);
-    await wait(300);
+    await wait(80);
     card.classList.add('show');
-    if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
-    else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
+    if(r.rank)soundCorrect.play().catch(()=>{});else soundWrong.play().catch(()=>{});
   }
-
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-a.group);
+  await wait(500);
   scoreSection.style.display='block';
+  pageTitle.textContent='✅ ตรวจคำตอบเสร็จสิ้น!';
+  topButtons.style.display='none';
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s}));
 };
 
-showScoreBtn.onclick=async()=>{
-  pageTitle.style.display='none';
-  topButtons.style.display='none';
-  results.style.display='none';
-  showScoreBtn.style.display='none';
-
-  let html=`<div class="score-card">
-  <h2>🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody>`;
-  scoreData.forEach((row,idx)=>{
-    html+=`<tr><td>${idx+1}</td><td>กลุ่ม ${row.group}</td><td>${row.score}</td></tr>`;
+showScoreBtn.onclick=()=>{
+  const sorted=[...scoreData].sort((a,b)=>b.score-a.score);
+  let html=`<div class='score-card'><h2>ตารางคะแนนรวม</h2><table><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนนรวม</th></tr>`;
+  sorted.forEach((g,i)=>{
+    html+=`<tr><td>${i+1}</td><td>กลุ่ม ${g.group}</td><td>${g.score}</td></tr>`;
   });
-  html+=`</tbody></table></div>`;
+  html+='</table></div>';
   scoreTable.innerHTML=html;
-
   saveContainer.style.display='flex';
   footerButtons.style.display='flex';
-
-  // 🕒 หน่วงเวลา 2 วิ ก่อนโชว์ leaderboard
-  await wait(2000);
-  leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
-    `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
+  const top5=sorted.slice(0,5);
+  leaderboardList.innerHTML=top5.map((r,i)=>`<div class='leader-item'><span>#${i+1} กลุ่ม ${r.group}</span><span>${r.score} คะแนน</span></div>`).join('');
   leaderboardPopup.style.display='flex';
-  soundCorrect.play().catch(()=>{});
 };
 
 closeLeaderboard.onclick=()=>{leaderboardPopup.style.display='none';};
+
+document.getElementById('saveBtn').onclick=()=>{
+  let text='สรุปคะแนนรวม\\n\\n';
+  scoreData.sort((a,b)=>b.score-a.score).forEach((g,i)=>{
+    text+=`อันดับ ${i+1} : กลุ่ม ${g.group} — ${g.score} คะแนน\\n`;
+  });
+  const blob=new Blob([text],{type:'text/plain'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='scores.txt';
+  a.click();
+};
 </script>
 </body>
 </html>
