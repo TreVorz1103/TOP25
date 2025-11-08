@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>เฉลยคำตอบ | เกมตอบคำถาม</title>
 
-<!-- ฟอนต์ Mitr -->
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -94,28 +93,47 @@ th { background: var(--highlight); color: #05245a; }
   gap: 15px; margin-top: 20px;
 }
 
-/* 🏆 Leaderboard */
-#leaderboard {
+/* 🏆 Leaderboard Popup */
+#leaderboardPopup {
   display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  animation: fadeIn 0.8s ease;
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7);
+  justify-content: center; align-items: center;
+  animation: fadeIn 0.3s ease;
+  z-index: 999;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+#leaderboardBox {
+  background: var(--bg1);
+  border: 4px solid var(--highlight);
+  border-radius: 20px;
+  padding: 30px;
+  text-align: center;
+  width: 90%; max-width: 500px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.3);
+  animation: slideUp 0.4s ease;
+}
+@keyframes slideUp { from { transform: translateY(50px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+#leaderboardBox h2 { color: var(--highlight); margin-bottom: 10px; }
+#leaderboardBox img {
+  width: 150px; margin-bottom: 15px;
+}
 .leader-item {
   background: var(--highlight);
   color: #012a66;
-  margin: 8px 0;
+  margin: 6px auto;
   padding: 10px 20px;
   border-radius: 10px;
-  width: 60%;
+  width: 80%;
   font-weight: bold;
-  font-size: 22px;
+  font-size: 20px;
   display: flex;
   justify-content: space-between;
-  box-shadow: 0 0 10px rgba(255,255,255,0.3);
+}
+#closeLeaderboard {
+  background: #fff; color: #05245a;
+  margin-top: 15px;
 }
 </style>
 </head>
@@ -135,7 +153,6 @@ th { background: var(--highlight); color: #05245a; }
   <div id="scoreSection" style="display:none;">
     <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
     <div id="scoreTable"></div>
-    <div id="leaderboard"></div>
     <div id="saveContainer">
       <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
     </div>
@@ -143,6 +160,16 @@ th { background: var(--highlight); color: #05245a; }
       <button id="backBtnBottom">⬅️ กลับหน้าแรก</button>
       <button id="resetBtnBottom">🔄 รีเซ็ต</button>
     </div>
+  </div>
+</div>
+
+<!-- 🏆 Leaderboard Popup -->
+<div id="leaderboardPopup">
+  <div id="leaderboardBox">
+    <img src="podium.png" alt="podium">
+    <h2>🏅 TOP 5 LEADERBOARD 🏅</h2>
+    <div id="leaderboardList"></div>
+    <button id="closeLeaderboard">ปิด</button>
   </div>
 </div>
 
@@ -155,63 +182,41 @@ function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 function norm(s){return (s||'').toLowerCase().trim();}
 function escapeHtml(s){return (s||'').replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
-// 🔊 ปลดล็อกเสียง
-document.body.addEventListener('click', () => {
-  soundCorrect.play().catch(()=>{});
-  soundCorrect.pause();
-  soundWrong.play().catch(()=>{});
-  soundWrong.pause();
-}, { once: true });
-
 const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
+const soundCorrect=document.getElementById('soundCorrect');
+const soundWrong=document.getElementById('soundWrong');
+document.body.addEventListener('click',()=>{
+  soundCorrect.play().catch(()=>{});soundCorrect.pause();
+  soundWrong.play().catch(()=>{});soundWrong.pause();
+},{once:true});
+
 const btn=document.getElementById('checkBtn');
-const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
-const scoreTable=document.getElementById('scoreTable');
-const saveContainer=document.getElementById('saveContainer');
-const saveBtn=document.getElementById('saveBtn');
-const backBtn=document.getElementById('backBtn');
-const resetBtn=document.getElementById('resetBtn');
+const statusEl=document.getElementById('status');
 const scoreSection=document.getElementById('scoreSection');
 const showScoreBtn=document.getElementById('showScoreBtn');
 const pageTitle=document.getElementById('pageTitle');
 const topButtons=document.getElementById('topButtons');
+const scoreTable=document.getElementById('scoreTable');
+const saveContainer=document.getElementById('saveContainer');
 const footerButtons=document.getElementById('footerButtons');
-const leaderboard=document.getElementById('leaderboard');
-const soundCorrect=document.getElementById('soundCorrect');
-const soundWrong=document.getElementById('soundWrong');
-const backBtnBottom=document.getElementById('backBtnBottom');
-const resetBtnBottom=document.getElementById('resetBtnBottom');
+const leaderboardPopup=document.getElementById('leaderboardPopup');
+const leaderboardList=document.getElementById('leaderboardList');
+const closeLeaderboard=document.getElementById('closeLeaderboard');
 
 let scoreData=[];
 
-function goHome(){
-  if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){
-    localStorage.clear();
-    location.href='index.html';
-  }
-}
-function resetPage(){
-  results.innerHTML='';
-  scoreTable.innerHTML='';
-  leaderboard.innerHTML='';
-  saveContainer.style.display='none';
-  btn.style.display='block';
-  scoreSection.style.display='none';
-  pageTitle.style.opacity='1';
-  topButtons.style.display='flex';
-  footerButtons.style.display='none';
-  results.style.display='block';
-}
+function goHome(){ if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){ localStorage.clear(); location.href='index.html'; } }
+function resetPage(){ location.reload(); }
 
-backBtn.addEventListener('click',goHome);
-backBtnBottom.addEventListener('click',goHome);
-resetBtn.addEventListener('click',resetPage);
-resetBtnBottom.addEventListener('click',resetPage);
+document.getElementById('backBtn').onclick=goHome;
+document.getElementById('backBtnBottom').onclick=goHome;
+document.getElementById('resetBtn').onclick=resetPage;
+document.getElementById('resetBtnBottom').onclick=resetPage;
 
-btn.addEventListener('click',async()=>{
+btn.onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
   btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   
@@ -220,9 +225,9 @@ btn.addEventListener('click',async()=>{
 
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
-  const notFound = resultData.filter(r=>!r.rank);
-  const ranked = resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
-  resultData = [...notFound,...ranked];
+  const notFound=resultData.filter(r=>!r.rank);
+  const ranked=resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
+  resultData=[...notFound,...ranked];
 
   for(const r of resultData){
     groupScores[r.group-1]+=r.score;
@@ -236,22 +241,18 @@ btn.addEventListener('click',async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(500);
+    await wait(400);
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
     card.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
-  scoreData = groupScores.map((s, i) => ({
-    group: i + 1,
-    score: s || 0
-  })).sort((a, b) => b.score - a.score || a.group - b.group);
-
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-a.group);
   scoreSection.style.display='block';
-});
+};
 
-showScoreBtn.addEventListener('click',async()=>{
+showScoreBtn.onclick=async()=>{
   pageTitle.style.display='none';
   topButtons.style.display='none';
   results.style.display='none';
@@ -276,13 +277,16 @@ showScoreBtn.addEventListener('click',async()=>{
   footerButtons.style.display='flex';
 
   await wait(800);
-  // แสดง Leaderboard Top 5
-  leaderboard.style.display='flex';
-  leaderboard.innerHTML = `<h2 style="color:var(--highlight);margin:15px 0;">🏅 TOP 5 LEADERBOARD 🏅</h2>` +
-    scoreData.slice(0,5).map((r,i)=>
-      `<div class="leader-item">อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`
-    ).join("");
-});
+  // 🏆 แสดง Leaderboard Popup
+  leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
+    `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
+  leaderboardPopup.style.display='flex';
+  soundCorrect.play().catch(()=>{});
+};
+
+closeLeaderboard.onclick=()=>{
+  leaderboardPopup.style.display='none';
+};
 </script>
 </body>
 </html>
