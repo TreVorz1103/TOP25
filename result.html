@@ -4,15 +4,11 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TOP25</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 :root {
-  --bg1: #031c47;
-  --bg2: #072f73;
-  --highlight: #ffd400;
-  --text: #ffffff;
+  --bg1:#031c47;--bg2:#072f73;--highlight:#ffd400;--text:#ffffff;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{
@@ -28,11 +24,8 @@ body{
   overflow-y:auto;scroll-behavior:smooth;position:relative;
 }
 h1{
-  color:var(--highlight);
-  text-shadow:2px 2px 0 #000;
-  font-size:2.5em;
-  text-align:center;
-  margin-bottom:20px;
+  color:var(--highlight);text-shadow:2px 2px 0 #000;
+  font-size:2.5em;text-align:center;margin-bottom:20px;
 }
 button{
   background:var(--highlight);color:#05245a;border:none;border-radius:10px;
@@ -40,24 +33,14 @@ button{
   transition:transform 0.15s;
 }
 button:hover{transform:scale(1.05);}
-#topButtons {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:20px;
-  width:100%;
-  text-align:center;
+#topButtons{
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;gap:10px;
+  margin-bottom:20px;width:100%;text-align:center;
 }
 .card-result{
-  background:rgba(255,255,255,0.1);
-  border:2px solid var(--highlight);
-  border-radius:15px;
-  padding:12px 20px;
-  margin:10px auto;
-  width:95%;max-width:800px;
-  display:flex;justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
+  border-radius:15px;padding:12px 20px;margin:10px auto;
+  width:95%;max-width:800px;display:flex;justify-content:space-between;align-items:center;
   opacity:0;transform:translateY(20px);
   transition:opacity 0.5s ease,transform 0.5s ease;
 }
@@ -66,18 +49,11 @@ button:hover{transform:scale(1.05);}
   background:var(--highlight);color:#012a66;padding:8px 12px;border-radius:10px;
   font-weight:bold;min-width:80px;text-align:center;
 }
-.notfound{
-  background:#ff4f4f !important;
-  color:#fff !important;
-}
+.notfound{background:#ff4f4f!important;color:#fff!important;}
 #results{width:100%;text-align:center;margin-top:20px;}
 #footerButtons{
-  display:none;
-  justify-content:center;
-  align-items:center;
-  gap:15px;
-  margin-top:auto;
-  padding-bottom:20px;
+  display:none;justify-content:center;align-items:center;gap:15px;
+  margin-top:auto;padding-bottom:20px;
 }
 </style>
 </head>
@@ -93,6 +69,11 @@ button:hover{transform:scale(1.05);}
 
   <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
   <div id="results"></div>
+
+  <div id="footerButtons">
+    <button id="scoreBtn">🏆 ดูสรุปคะแนน</button>
+    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
+  </div>
 
   <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="Wrong.mp3" preload="auto"></audio>
@@ -111,10 +92,15 @@ const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
+const backBtn2=document.getElementById('backBtn2');
+const scoreBtn=document.getElementById('scoreBtn');
 const correctSound=document.getElementById('correctSound');
 const wrongSound=document.getElementById('wrongSound');
 
+let scoreData=[];
+
 backBtn.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
+backBtn2.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
 resetBtn.onclick=()=>{location.reload();};
 
 checkBtn.addEventListener('click',async()=>{
@@ -128,10 +114,10 @@ checkBtn.addEventListener('click',async()=>{
   ranks.forEach((r,i)=>map.set(norm(r),i+1));
 
   let resultData=answers.map((t,i)=>({
-    text:t,
-    rank:map.get(norm(t))||null,
-    group:i+1
+    text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0
   })).filter(r=>r.text.trim()!=="");
+
+  const groupScores=Array(answers.length).fill(0);
 
   // ✅ เรียง: ไม่พบก่อน → จากนั้นเรียงตามอันดับน้อย→มาก
   const notFound=resultData.filter(r=>!r.rank);
@@ -147,6 +133,7 @@ checkBtn.addEventListener('click',async()=>{
   }
 
   for(const r of resultData){
+    groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
     card.innerHTML=`
@@ -172,7 +159,17 @@ checkBtn.addEventListener('click',async()=>{
 
     card.scrollIntoView({behavior:"smooth",block:"end"});
   }
+
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0}))
+    .sort((a,b)=>b.score-a.score||a.group-b.group);
+  localStorage.setItem('scoreData',JSON.stringify(scoreData));
+
+  // ✅ แสดงปุ่มด้านล่างหลังเฉลยจบ
+  await wait(500);
+  document.getElementById('footerButtons').style.display='flex';
 });
+
+scoreBtn.onclick=()=>{location.href='score.html';};
 </script>
 </body>
 </html>
