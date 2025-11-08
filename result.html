@@ -14,177 +14,82 @@
   --highlight: #ffd400;
   --text: #ffffff;
 }
-
-* {box-sizing:border-box;margin:0;padding:0;}
-
-body {
-  height: 100vh;
-  width: 100vw;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background: linear-gradient(180deg, var(--bg1), var(--bg2));
-  font-family: "Mitr", sans-serif;
-  color: var(--text);
-  overflow: hidden;
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+  height:100vh;width:100vw;display:flex;justify-content:center;align-items:center;
+  background:linear-gradient(180deg,var(--bg1),var(--bg2));
+  font-family:"Mitr",sans-serif;color:var(--text);overflow:hidden;
 }
-
-.container {
-  width: 90vw;
-  height: 90vh;
-  background: rgba(255, 255, 255, 0.08);
-  border: 5px solid var(--highlight);
-  border-radius: 20px;
-  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 20px 30px;
-  overflow-y: auto;
+.container{
+  width:90vw;height:90vh;background:rgba(255,255,255,0.08);
+  border:5px solid var(--highlight);border-radius:20px;
+  box-shadow:0 0 30px rgba(255,255,255,0.3);
+  display:flex;flex-direction:column;align-items:center;padding:20px 30px;overflow-y:auto;
 }
-
-h1 {
-  color: var(--highlight);
-  text-shadow: 2px 2px 0 #000;
-  font-size: 2.5em;
-  text-align: center;
-  margin-bottom: 20px;
+h1{color:var(--highlight);text-shadow:2px 2px 0 #000;font-size:2.5em;text-align:center;margin-bottom:20px;}
+button{
+  background:var(--highlight);color:#05245a;border:none;border-radius:10px;
+  padding:12px 22px;font-size:18px;font-weight:700;cursor:pointer;margin:8px;
+  transition:transform 0.15s;
 }
-
-button {
-  background: var(--highlight);
-  color: #05245a;
-  border: none;
-  border-radius: 10px;
-  padding: 12px 22px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  margin: 8px;
-  transition: transform 0.15s;
+button:hover{transform:scale(1.05);}
+.card-result{
+  background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
+  border-radius:15px;padding:12px 20px;margin:10px auto;width:95%;max-width:800px;
+  display:flex;justify-content:space-between;align-items:center;
+  opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;
 }
-button:hover { transform: scale(1.05); }
-
-.card-result {
-  background: rgba(255,255,255,0.1);
-  border: 2px solid var(--highlight);
-  border-radius: 15px;
-  padding: 12px 20px;
-  margin: 10px auto;
-  width: 95%;
-  max-width: 800px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+.card-result.show{opacity:1;transform:translateY(0);}
+.rank-badge{
+  background:var(--highlight);color:#012a66;padding:8px 12px;border-radius:10px;
+  font-weight:bold;min-width:80px;text-align:center;
 }
-.card-result.show {
-  opacity: 1;
-  transform: translateY(0);
+.notfound{
+  background:#ff4f4f;color:#fff;padding:8px 12px;border-radius:10px;
+  font-weight:bold;min-width:80px;text-align:center;
 }
-
-.rank-badge {
-  background: var(--highlight);
-  color: #012a66;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-weight: bold;
-  min-width: 80px;
-  text-align: center;
+#results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
+table{
+  width:85%;margin:15px auto;border-collapse:collapse;background:#ffffff;color:#05245a;
+  border-radius:12px;overflow:hidden;
 }
-.notfound {
-  background: #ff4f4f;
-  color: #fff;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-weight: bold;
-  min-width: 80px;
-  text-align: center;
-}
-
-#results, #scoreTable {
-  width: 100%;
-  text-align: center;
-  margin-top: 20px;
-}
-
-table {
-  width: 85%;
-  margin: 15px auto;
-  border-collapse: collapse;
-  background: #ffffff;
-  color: #05245a;
-  border-radius: 12px;
-  overflow: hidden;
-}
-th, td {
-  border: 1px solid #ccc;
-  padding: 10px 12px;
-  font-size: 16px;
-}
-th {
-  background: var(--highlight);
-  color: #05245a;
-}
-
-.table-row {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.table-row.show {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-#saveContainer {
-  display: none;
-  margin-top: 25px;
-}
-
-select {
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 2px solid var(--highlight);
-  background: #fff7d0;
-  color: #05245a;
-  font-size: 16px;
-  margin-right: 10px;
+th,td{border:1px solid #ccc;padding:10px 12px;font-size:16px;}
+th{background:var(--highlight);color:#05245a;}
+.table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
+.table-row.show{opacity:1;transform:translateY(0);}
+#saveContainer{display:none;margin-top:25px;}
+select{
+  padding:8px 10px;border-radius:8px;border:2px solid var(--highlight);
+  background:#fff7d0;color:#05245a;font-size:16px;margin-right:10px;
 }
 </style>
 </head>
 <body>
-  <div class="container">
-    <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
+<div class="container">
+  <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
+  <div style="display:flex;flex-wrap:wrap;justify-content:center;">
+    <button id="backBtn">⬅️ กลับหน้าแรก</button>
+    <button id="resetBtn">🔄 รีเซ็ต</button>
+    <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
+  </div>
 
-    <div style="display:flex;flex-wrap:wrap;justify-content:center;">
-      <button id="backBtn">⬅️ กลับหน้าแรก</button>
-      <button id="resetBtn">🔄 รีเซ็ต</button>
-      <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
-    </div>
+  <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
+  <div id="results"></div>
 
-    <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
-
-    <div id="results"></div>
-
-    <div id="scoreSection" style="display:none;">
-      <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
-      <div id="scoreTable"></div>
-
-      <div id="saveContainer">
-        <select id="gameSelect">
-          <option value="">-- เลือกเกมที่จะบันทึก --</option>
-          <option value="เกมที่ 1">เกมที่ 1</option>
-          <option value="เกมที่ 2">เกมที่ 2</option>
-          <option value="เกมที่ 3">เกมที่ 3</option>
-        </select>
-        <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
-      </div>
+  <div id="scoreSection" style="display:none;">
+    <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
+    <div id="scoreTable"></div>
+    <div id="saveContainer">
+      <select id="gameSelect">
+        <option value="">-- เลือกเกมที่จะบันทึก --</option>
+        <option value="เกมที่ 1">เกมที่ 1</option>
+        <option value="เกมที่ 2">เกมที่ 2</option>
+        <option value="เกมที่ 3">เกมที่ 3</option>
+      </select>
+      <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
     </div>
   </div>
+</div>
 
 <!-- เสียงเอฟเฟกต์ -->
 <audio id="ding" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c0b4ac7780.mp3?filename=notification-2-144459.mp3"></audio>
@@ -267,25 +172,35 @@ showScoreBtn.addEventListener('click',async()=>{
   saveContainer.style.display='block';
 });
 
-const scriptURL = "https://script.google.com/macros/s/AKfycbzJzfs86sfFj7KOOfFlH4s2AhOiO0QpOw0sx_guAAocIMIIw6OmLPv9c_WygaEIO1Dhzg/exec";
+// ✅ ใส่ URL Script ของ Thanaphat ตรงนี้
+const scriptURL = "https://script.google.com/macros/s/AKfycbxxxxxxxxxxxxxxxxxxxxxxxxx/exec";
 
 saveBtn.addEventListener('click', () => {
   const game = gameSelect.value;
   if (!game) return alert("⚠️ กรุณาเลือกเกมก่อนบันทึก");
   if (!scoreData.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
   const payload = { game, scores: scoreData };
+
   fetch(scriptURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   })
-  .then(() => alert("✅ บันทึกข้อมูลสำเร็จ!"))
+  .then(res => res.text())
+  .then(text => {
+    console.log("Script response:", text);
+    if (text.includes("✅")) {
+      cheer.play();
+      alert("✅ บันทึกข้อมูลสำเร็จ!");
+    } else {
+      alert("❌ เกิดข้อผิดพลาดจากฝั่ง Script:\n" + text);
+    }
+  })
   .catch(err => {
-    console.error(err);
-    alert("❌ เกิดข้อผิดพลาดในการบันทึก");
+    console.error("Fetch error:", err);
+    alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Script");
   });
 });
 </script>
 </body>
 </html>
-
