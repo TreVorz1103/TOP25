@@ -190,6 +190,28 @@ button:hover{transform:scale(1.05);}
   background: #ff6666;
 }
 
+#overlayRanks {
+  background: rgba(3, 28, 71, 0.95);
+  color: #fff;
+  font-family: "Mitr", sans-serif;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 999;
+  padding: 40px 20px;
+}
+
+#ranksList {
+  background: linear-gradient(180deg, #072f73, #031c47);
+  border: 5px solid #ffd400;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(255,255,255,0.3);
+  padding: 30px 40px;
+  text-align: center;
+  color: #fff;
+}
+
 </style>
 </head>
 <body>
@@ -346,30 +368,46 @@ const closeRanks = document.getElementById('closeRanks');
 const ranksList = document.getElementById('ranksList');
 
 showAllRanksBtn.onclick = () => {
-  const ranks = (localStorage.getItem('ranks') || '')
-    .split('\n')
-    .map(v => v.trim())
-    .filter(Boolean);
+  const ranks = (localStorage.getItem('ranks') || '').split('\n').map(v => v.trim()).filter(Boolean);
 
   if (!ranks.length) {
     alert('❌ ไม่พบข้อมูลอันดับคำตอบ');
     return;
   }
 
-  // เรียงจาก 25 → 1
-  const reversed = ranks.slice().reverse();
-  ranksList.innerHTML = '<h2 style="color:#ffd400;margin-bottom:15px;">🏆 เฉลยคำตอบทั้งหมด (25 → 1)</h2>';
+  // 🟡 เรียงจาก 25 → 1
+  const reversed = ranks.slice().reverse().map((ans, i) => ({
+    num: ranks.length - i, // 25 → 1
+    text: ans
+  }));
 
-  reversed.forEach((ans, i) => {
-    const rankNum = 25 - i;
-    ranksList.innerHTML += `
-      <div class="rank-row">
-        <div class="rank-text">${ans}</div>
-        <div class="rank-num">ที่ ${rankNum}</div>
-      </div>
-    `;
+  // ✅ โครงสร้าง HTML แบบ 5 คอลัมน์เหมือนภาพ
+  let html = `
+    <h2 style="color:#ffd400;margin-bottom:20px;font-size:2.2em;text-shadow:2px 2px 0 #000;">เฉลยคำตอบ</h2>
+    <div style="
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+      gap:12px 25px;
+      text-align:left;
+      font-size:20px;
+      line-height:1.6;
+      color:#fff;
+      background:rgba(255,255,255,0.05);
+      padding:25px 30px;
+      border-radius:15px;
+      border:3px solid #ffd400;
+      max-width:850px;
+      margin:auto;
+    ">
+  `;
+
+  reversed.forEach(item => {
+    html += `<div><b>${item.num}</b> ${item.text}</div>`;
   });
 
+  html += `</div>`;
+
+  ranksList.innerHTML = html;
   overlayRanks.style.display = 'flex';
 };
 
