@@ -60,6 +60,7 @@ button.show{
   </table>
   <button id="backBtn">⬅️ กลับหน้าแรก</button>
   <button id="revealBtn">📋 กลับไปดูเฉลย</button>
+  <button id="saveTxtBtn">💾 บันทึก TXT</button>
 </div>
 
 <script>
@@ -68,6 +69,7 @@ const loading=document.getElementById('loading');
 const scoreTable=document.getElementById('scoreTable');
 const backBtn=document.getElementById('backBtn');
 const revealBtn=document.getElementById('revealBtn');
+const saveTxtBtn=document.getElementById('saveTxtBtn');
 
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 
@@ -76,9 +78,11 @@ async function loadScores(){
   scoreTable.classList.remove('show');
   backBtn.classList.remove('show');
   revealBtn.classList.remove('show');
+  saveTxtBtn.classList.remove('show');
   scoreTable.style.display='none';
   backBtn.style.display='none';
   revealBtn.style.display='none';
+  saveTxtBtn.style.display='none';
 
   await wait(1500); // รอโหลด 1.5 วินาที
   const scoreData=JSON.parse(localStorage.getItem('scoreData')||'[]');
@@ -108,16 +112,47 @@ async function loadScores(){
   scoreTable.classList.add('show');
   backBtn.style.display='inline-block';
   revealBtn.style.display='inline-block';
+  saveTxtBtn.style.display='inline-block';
   await wait(200);
   backBtn.classList.add('show');
   await wait(200);
   revealBtn.classList.add('show');
+  await wait(200);
+  saveTxtBtn.classList.add('show');
 }
 
 loadScores();
 
+// กลับหน้าแรก
 backBtn.onclick=()=>{localStorage.clear();location.href='index.html';};
+
+// กลับไปดูเฉลย
 revealBtn.onclick=()=>{location.href='result.html';};
+
+// ✅ ปุ่มบันทึกไฟล์ TXT
+saveTxtBtn.onclick=()=>{
+  const scoreData=JSON.parse(localStorage.getItem('scoreData')||'[]');
+  if(!scoreData.length){
+    alert('❌ ไม่มีข้อมูลให้บันทึก');
+    return;
+  }
+
+  // เรียงตามกลุ่มที่ 1 → 18
+  const sorted=[...scoreData].sort((a,b)=>a.group-b.group);
+
+  let text="สรุปผลคะแนน TOP25\n=====================\n\n";
+  sorted.forEach(r=>{
+    text+=`กลุ่มที่ ${r.group} : ${r.score} คะแนน\n`;
+  });
+
+  const blob=new Blob([text],{type:"text/plain"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='TOP25_Score.txt';
+  a.click();
+  URL.revokeObjectURL(url);
+};
 </script>
 </body>
 </html>
