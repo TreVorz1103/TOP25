@@ -2,10 +2,9 @@
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>TOP 25</title>
 <link rel="icon" type="image/png" href="logo.png">
-
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -19,41 +18,36 @@ body{
   justify-content:center;
   align-items:center;
   min-height:100vh;
+  padding:20px;
 }
 .stage{
   background:rgba(255,255,255,0.05);
   padding:24px;
   border-radius:18px;
-  border:5px solid var(--accent);
+  border:4px solid var(--accent);
   max-width:900px;
-  width:95%;
+  width:100%;
+  box-shadow:0 0 20px rgba(255,255,255,0.15);
 }
 h1{
   text-align:center;
   color:var(--accent);
   font-weight:600;
+  font-size:2rem;
+  margin-bottom:10px;
 }
-textarea{
+label{display:block;margin-top:10px;font-weight:500;}
+textarea, input{
   width:100%;
-  height:150px;
   border-radius:10px;
   border:1px solid rgba(255,255,255,0.2);
-  background:rgba(0,0,0,0.2);
+  background:rgba(0,0,0,0.25);
   color:#fff;
   padding:10px;
   font-size:16px;
   font-family:"Mitr",sans-serif;
 }
-input{
-  width:100%;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.2);
-  background:rgba(0,0,0,0.2);
-  color:#fff;
-  font-size:16px;
-  font-family:"Mitr",sans-serif;
-}
+textarea{height:150px;resize:vertical;}
 .grid{
   display:grid;
   grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
@@ -73,6 +67,8 @@ button{
   display:block;
   margin:20px auto 0;
   transition:transform .1s ease;
+  width:100%;
+  max-width:320px;
 }
 button:hover{opacity:0.9;transform:scale(1.02);}
 .toggle{
@@ -83,11 +79,15 @@ button:hover{opacity:0.9;transform:scale(1.02);}
   cursor:pointer;
 }
 #answersArea{margin-top:30px;}
-#footer{
-  text-align:center;
-  color:#ccc;
-  margin-top:20px;
-  font-size:13px;
+#footer{text-align:center;color:#ccc;margin-top:20px;font-size:13px;}
+
+/* 📱 Responsive */
+@media(max-width:768px){
+  h1{font-size:1.6rem;}
+  textarea{height:120px;font-size:15px;}
+  input{font-size:15px;}
+  button{font-size:16px;padding:10px;}
+  .grid{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -105,7 +105,7 @@ button:hover{opacity:0.9;transform:scale(1.02);}
   </div>
 
   <button id="nextBtn">➡️ ไปหน้าถัดไป </button>
-  <div id="footer">v1.2 | THP</div>
+  <div id="footer">v1.3 | THP</div>
 </div>
 
 <script>
@@ -133,29 +133,14 @@ document.getElementById('nextBtn').addEventListener('click',()=>{
   for(let i=1;i<=18;i++){
     answers.push(document.getElementById('ans'+i).value.trim());
   }
-
   if(!ranks){alert('กรุณาใส่ข้อมูล 25 อันดับ');return;}
-
-  // ✅ เก็บข้อมูลไว้ใน localStorage
   localStorage.setItem('ranks',ranks);
   localStorage.setItem('answers',JSON.stringify(answers));
-
-  // ✅ ตรวจว่ามี result.html หรือไม่
-  fetch('result.html',{method:'HEAD'})
-    .then(res=>{
-      if(res.ok){
-        location.href='result.html';
-      }else{
-        alert('⚠️ ไม่พบไฟล์ result.html ในโฟลเดอร์เดียวกัน');
-      }
-    })
-    .catch(()=>{
-      alert('⚠️ ไม่พบไฟล์ result.html (ตรวจสอบชื่อไฟล์ให้ถูกต้อง)');
-    });
+  fetch('result.html',{method:'HEAD'}).then(res=>{
+    if(res.ok){location.href='result.html';}
+    else{alert('⚠️ ไม่พบไฟล์ result.html ในโฟลเดอร์เดียวกัน');}
+  }).catch(()=>alert('⚠️ ไม่พบไฟล์ result.html'));
 });
 </script>
 </body>
 </html>
-
-
-
