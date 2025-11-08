@@ -1,49 +1,106 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>เฉลยคำตอบ | TOP25</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 :root {
-  --bg1: #031c47; --bg2: #072f73; --highlight: #ffd400; --text: #ffffff;
+  --bg1: #031c47;
+  --bg2: #072f73;
+  --highlight: #ffd400;
+  --text: #ffffff;
 }
+*{box-sizing:border-box;margin:0;padding:0;}
 body{
-  margin:0;font-family:"Mitr",sans-serif;color:var(--text);
+  height:100vh;width:100vw;display:flex;justify-content:center;align-items:center;
   background:linear-gradient(180deg,var(--bg1),var(--bg2));
-  display:flex;justify-content:center;align-items:center;min-height:100vh;
+  font-family:"Mitr",sans-serif;color:var(--text);overflow:hidden;
 }
 .container{
-  width:95vw;max-width:900px;background:rgba(255,255,255,0.08);
+  width:95vw;height:95vh;background:rgba(255,255,255,0.08);
   border:5px solid var(--highlight);border-radius:20px;
-  padding:20px;box-shadow:0 0 25px rgba(255,255,255,0.2);
+  box-shadow:0 0 30px rgba(255,255,255,0.3);
+  display:flex;flex-direction:column;align-items:center;padding:20px 30px;
+  overflow-y:auto;scroll-behavior:smooth;position:relative;
+}
+h1{
+  color:var(--highlight);
+  text-shadow:2px 2px 0 #000;
+  font-size:2.5em;
   text-align:center;
+  margin-bottom:20px;
 }
 button{
   background:var(--highlight);color:#05245a;border:none;border-radius:10px;
-  padding:10px 20px;font-size:18px;font-weight:700;cursor:pointer;margin:10px;
+  padding:12px 22px;font-size:18px;font-weight:700;cursor:pointer;margin:8px;
+  transition:transform 0.15s;
+}
+button:hover{transform:scale(1.05);}
+#topButtons {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+  width:100%;
+  text-align:center;
 }
 .card-result{
-  background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
-  border-radius:12px;padding:10px 15px;margin:8px 0;display:flex;
-  justify-content:space-between;align-items:center;
+  background:rgba(255,255,255,0.1);
+  border:2px solid var(--highlight);
+  border-radius:15px;
+  padding:12px 20px;
+  margin:10px auto;
+  width:95%;max-width:800px;
+  display:flex;justify-content:space-between;align-items:center;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.5s ease,transform 0.5s ease;
 }
-.rank-badge{background:var(--highlight);color:#012a66;padding:6px 12px;border-radius:8px;font-weight:700;}
-.notfound{background:#ff4f4f;color:#fff;}
+.card-result.show{opacity:1;transform:translateY(0);}
+.rank-badge{
+  background:var(--highlight);color:#012a66;padding:8px 12px;border-radius:10px;
+  font-weight:bold;min-width:80px;text-align:center;
+}
+.notfound{
+  background:#ff4f4f !important;
+  color:#fff !important;
+}
+#results{width:100%;text-align:center;margin-top:20px;}
+#footerButtons{
+  display:none;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+  margin-top:auto;
+  padding-bottom:20px;
+}
 </style>
 </head>
 <body>
-<div class="container">
+<div class="container" id="container">
   <h1>🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
-  <button id="backBtn">⬅️ กลับหน้าแรก</button>
-  <button id="checkBtn">📋 แสดงเฉลย</button>
-  <div id="status" style="margin:10px;display:none;">⏳ กำลังตรวจคำตอบ...</div>
+
+  <div id="topButtons">
+    <button id="backBtn">⬅️ กลับหน้าแรก</button>
+    <button id="resetBtn">🔄 รีเซ็ต</button>
+    <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
+  </div>
+
+  <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
   <div id="results"></div>
-  <button id="nextBtn" style="display:none;">🏆 ไปหน้าสรุปคะแนน</button>
+
+  <div id="footerButtons">
+    <button id="scoreBtn">🏆 ดูสรุปคะแนน</button>
+    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
+  </div>
 
   <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
-  <audio id="wrongSound" src="Worng.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="Wrong.mp3" preload="auto"></audio>
 </div>
 
 <script>
@@ -55,43 +112,79 @@ const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).fil
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
 const checkBtn=document.getElementById('checkBtn');
-const backBtn=document.getElementById('backBtn');
-const results=document.getElementById('results');
-const nextBtn=document.getElementById('nextBtn');
 const statusEl=document.getElementById('status');
+const results=document.getElementById('results');
+const backBtn=document.getElementById('backBtn');
+const resetBtn=document.getElementById('resetBtn');
+const backBtn2=document.getElementById('backBtn2');
+const scoreBtn=document.getElementById('scoreBtn');
 const correctSound=document.getElementById('correctSound');
 const wrongSound=document.getElementById('wrongSound');
 
 let scoreData=[];
 
-backBtn.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลหรือไม่?')){localStorage.clear();location.href='index.html';}};
+backBtn.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
+backBtn2.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
+resetBtn.onclick=()=>{location.reload();};
 
-checkBtn.onclick=async()=>{
+checkBtn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  checkBtn.style.display='none';statusEl.style.display='block';await wait(800);statusEl.style.display='none';
-  
-  const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
+  checkBtn.style.display='none';
+  statusEl.style.display='block';
+  await wait(1000);
+  statusEl.style.display='none';
+
+  const map=new Map();
+  ranks.forEach((r,i)=>map.set(norm(r),i+1));
+
+  let resultData=answers.map((t,i)=>({
+    text:t,
+    rank:map.get(norm(t))||null,
+    group:i+1,
+    score:map.get(norm(t))||0
+  })).filter(r=>r.text.trim()!=="");
+
   const groupScores=Array(answers.length).fill(0);
 
-  const resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0}));
+  // ✅ เรียง: ไม่พบก่อน → จากนั้นเรียงตามอันดับน้อย→มาก
+  const notFound=resultData.filter(r=>!r.rank);
+  const ranked=resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
+  resultData=[...notFound,...ranked];
+
   results.innerHTML='';
-  for(const r of resultData){
-    groupScores[r.group-1]+=r.score;
-    const div=document.createElement('div');
-    div.className='card-result';
-    div.innerHTML=`<div><div>${escapeHtml(r.text)}</div><div style="font-size:14px;color:#ccc;">กลุ่ม ${r.group}</div></div>
-    ${r.rank?`<div class="rank-badge">ที่ ${r.rank}</div>`:`<div class="rank-badge notfound">ไม่พบ</div>`}`;
-    results.appendChild(div);
-    if(r.rank) correctSound.play(); else wrongSound.play();
-    await wait(300);
+  if(notFound.length && ranked.length){
+    const divider=document.createElement('div');
+    divider.innerHTML=`<hr style="border:1px dashed #ffd400;margin:20px 0;opacity:0.6;">
+      <div style="text-align:center;color:#ffd400;font-weight:600;">✅ คำตอบที่อยู่ใน TOP 25</div>`;
   }
 
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-b.group);
-  localStorage.setItem('scoreData',JSON.stringify(scoreData));
-  nextBtn.style.display='inline-block';
-};
+  for(const r of resultData){
+    groupScores[r.group-1]+=r.score;
+    const card=document.createElement('div');
+    card.className='card-result';
+    card.innerHTML=`
+      <div>
+        <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
+        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
+      </div>
+      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
+    `;
+    results.appendChild(card);
+    await wait(300);
+    card.classList.add('show');
+    if(r.rank) correctSound.play(); else wrongSound.play();
+    card.scrollIntoView({behavior:"smooth",block:"end"});
+  }
 
-nextBtn.onclick=()=>{location.href='score.html';};
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0}))
+    .sort((a,b)=>b.score-a.score||a.group-b.group);
+  localStorage.setItem('scoreData',JSON.stringify(scoreData));
+
+  await wait(500);
+  document.getElementById('footerButtons').style.display='flex';
+});
+
+scoreBtn.onclick=()=>{location.href='summary.html';};
 </script>
 </body>
 </html>
