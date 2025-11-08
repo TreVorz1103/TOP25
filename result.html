@@ -17,10 +17,11 @@
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
   height: 100vh;
   width: 100vw;
   display: flex;
@@ -33,26 +34,26 @@ body {
 }
 
 .container {
-  background: rgba(255, 255, 255, 0.06);
+  width: 90vw;
+  height: 90vh;
+  background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
-  width: 95vw;
-  height: 90vh;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-start;
+  align-items: center;
   padding: 20px 30px;
-  box-shadow: 0 0 25px rgba(255,255,255,0.2);
   overflow-y: auto;
 }
 
 h1 {
   color: var(--highlight);
   text-shadow: 2px 2px 0 #000;
-  font-size: 2.2em;
+  font-size: 2.5em;
   text-align: center;
-  margin: 10px 0 20px;
+  margin-bottom: 20px;
 }
 
 button {
@@ -60,15 +61,16 @@ button {
   color: #05245a;
   border: none;
   border-radius: 10px;
-  padding: 12px 20px;
+  padding: 12px 22px;
   font-size: 18px;
   font-weight: 700;
-  font-family: "Mitr", sans-serif;
   cursor: pointer;
-  margin: 5px;
+  margin: 8px;
   transition: transform 0.15s;
 }
-button:hover { transform: scale(1.05); }
+button:hover {
+  transform: scale(1.05);
+}
 
 .card-result {
   background: rgba(255,255,255,0.1);
@@ -81,6 +83,13 @@ button:hover { transform: scale(1.05); }
   display: flex;
   justify-content: space-between;
   align-items: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.card-result.show {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .rank-badge {
@@ -119,7 +128,7 @@ table {
 }
 th, td {
   border: 1px solid #ccc;
-  padding: 8px 10px;
+  padding: 10px 12px;
   font-size: 16px;
 }
 th {
@@ -129,11 +138,11 @@ th {
 
 #saveContainer {
   display: none;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 select {
-  padding: 8px;
+  padding: 8px 10px;
   border-radius: 8px;
   border: 2px solid var(--highlight);
   background: #fff7d0;
@@ -147,7 +156,7 @@ select {
   <div class="container">
     <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
 
-    <div>
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;">
       <button id="backBtn">⬅️ กลับหน้าแรก</button>
       <button id="resetBtn">🔄 รีเซ็ต</button>
       <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
@@ -156,9 +165,11 @@ select {
     <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
 
     <div id="results"></div>
+
     <div id="scoreSection" style="display:none;">
       <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
       <div id="scoreTable"></div>
+
       <div id="saveContainer">
         <select id="gameSelect">
           <option value="">-- เลือกเกมที่จะบันทึก --</option>
@@ -201,19 +212,26 @@ btn.addEventListener('click',async()=>{
   btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
-  resultData.sort((a,b)=>{if(a.rank===null&&b.rank!==null)return-1;if(a.rank!==null&&b.rank===null)return 1;if(a.rank===null&&b.rank===null)return a.group-b.group;return a.rank-b.rank;});
-  results.innerHTML='';const groupScores=Array(answers.length).fill(0);
-  for(const r of resultData){groupScores[r.group-1]+=r.score;
+
+  results.innerHTML='';
+  const groupScores=Array(answers.length).fill(0);
+
+  for(const [index, r] of resultData.entries()){
+    groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
     card.innerHTML=`
       <div>
         <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
-        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank?'ติด 25 อันดับ':'ไม่ติดอันดับ'}</div>
+        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
       </div>
-      ${r.rank?`<div class="rank-badge">ที่ ${r.rank}</div>`:`<div class="notfound">❌</div>`}
+      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="notfound">❌</div>`}
     `;
     results.appendChild(card);
+
+    // หน่วงเวลาแสดงแต่ละกล่อง
+    await wait(750);
+    card.classList.add('show');
   }
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
@@ -221,7 +239,6 @@ btn.addEventListener('click',async()=>{
 });
 
 showScoreBtn.addEventListener('click',()=>{
-  // ซ่อนเฉลย แล้วแสดงตารางคะแนน
   results.style.display='none';
   showScoreBtn.style.display='none';
 
@@ -232,17 +249,14 @@ showScoreBtn.addEventListener('click',()=>{
   saveContainer.style.display='block';
 });
 
-// ✅ ส่วนใหม่: ส่งข้อมูลไป Google Sheet
-const scriptURL = "https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec"; // แก้ตรงนี้เป็น URL ของ Web App คุณ
+const scriptURL = "https://script.google.com/macros/s/AKfycbznZXKXoB2tTb5SMSNT5IugsOiKj8Opcz9gld8EuccA7Qeq_xDAD-IKXLYAOURR7CXR0g/exec";
 
 saveBtn.addEventListener('click', () => {
   const game = gameSelect.value;
   if (!game) return alert("⚠️ กรุณาเลือกเกมก่อนบันทึก");
-
   if (!scoreData.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
 
   const payload = { game, scores: scoreData };
-
   fetch(scriptURL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
