@@ -1,121 +1,17 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>เฉลยคำตอบ | เกมตอบคำถาม</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
-
 <style>
-:root {
-  --bg1: #031c47;
-  --bg2: #072f73;
-  --highlight: #ffd400;
-  --text: #ffffff;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-  height:100vh;width:100vw;display:flex;justify-content:center;align-items:center;
-  background:linear-gradient(180deg,var(--bg1),var(--bg2));
-  font-family:"Mitr",sans-serif;color:var(--text);overflow:hidden;
-}
-.container{
-  width:90vw;height:90vh;background:rgba(255,255,255,0.08);
-  border:5px solid var(--highlight);border-radius:20px;
-  box-shadow:0 0 30px rgba(255,255,255,0.3);
-  display:flex;flex-direction:column;align-items:center;padding:20px 30px;overflow-y:auto;
-  scroll-behavior:smooth;
-  position:relative;
-}
-h1{
-  color:var(--highlight);
-  text-shadow:2px 2px 0 #000;
-  font-size:2.5em;
-  text-align:center;
-  margin-bottom:20px;
-  transition:opacity 0.5s ease;
-}
-button{
-  background:var(--highlight);color:#05245a;border:none;border-radius:10px;
-  padding:12px 22px;font-size:18px;font-weight:700;cursor:pointer;margin:8px;
-  transition:transform 0.15s;
-}
-button:hover{transform:scale(1.05);}
-.button-group {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0 20px 0;
-  width: 100%;
-  text-align: center;
-  transition:all 0.4s ease;
-}
-.card-result{
-  background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
-  border-radius:15px;padding:12px 20px;margin:10px auto;width:95%;max-width:800px;
-  display:flex;justify-content:space-between;align-items:center;
-  opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;
-}
-.card-result.show{opacity:1;transform:translateY(0);}
-.rank-badge{
-  background:var(--highlight);color:#012a66;padding:8px 12px;border-radius:10px;
-  font-weight:bold;min-width:80px;text-align:center;
-}
-.notfound{
-  background:#ff4f4f !important;
-  color:#fff !important;
-}
-#results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
+...
 table{
-  width:85%;margin:15px auto;border-collapse:collapse;background:#ffffff;color:#05245a;
-  border-radius:12px;overflow:hidden;
+  width:95%; /* 🔥 ปรับจาก 85% เป็น 95% ให้กว้างขึ้น */
+  margin:20px auto;
+  border-collapse:collapse;
+  background:#ffffff;
+  color:#05245a;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 0 15px rgba(0,0,0,0.15);
 }
-th,td{border:1px solid #ccc;padding:10px 12px;font-size:16px;}
-th{background:var(--highlight);color:#05245a;}
-.table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
-.table-row.show{opacity:1;transform:translateY(0);}
-#saveContainer{display:none;margin-top:25px;flex-direction:column;align-items:center;}
-#footerButtons {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
-}
+...
 </style>
-</head>
-<body>
-<div class="container" id="container">
-  <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
-
-  <div class="button-group" id="topButtons">
-    <button id="backBtn">⬅️ กลับหน้าแรก</button>
-    <button id="resetBtn">🔄 รีเซ็ต</button>
-    <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
-  </div>
-
-  <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
-  <div id="results"></div>
-
-  <div id="scoreSection" style="display:none;">
-    <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
-    <div id="scoreTable"></div>
-    <div id="saveContainer">
-      <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
-    </div>
-    <div id="footerButtons">
-      <button id="backBtnBottom">⬅️ กลับหน้าแรก</button>
-      <button id="resetBtnBottom">🔄 รีเซ็ต</button>
-    </div>
-  </div>
-</div>
-
-<!-- 🔊 preload เสียง -->
-<audio id="soundCorrect" src="Ding.mp3" preload="auto"></audio>
-<audio id="soundWrong" src="Worng.mp3" preload="auto"></audio>
 
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
@@ -142,7 +38,6 @@ const soundCorrect=document.getElementById('soundCorrect');
 const soundWrong=document.getElementById('soundWrong');
 const backBtnBottom=document.getElementById('backBtnBottom');
 const resetBtnBottom=document.getElementById('resetBtnBottom');
-const container=document.getElementById('container');
 
 let scoreData=[];
 
@@ -162,6 +57,7 @@ function resetPage(){
   topButtons.style.display='flex';
   footerButtons.style.display='none';
   results.style.display='block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 backBtn.addEventListener('click',goHome);
@@ -171,10 +67,17 @@ resetBtnBottom.addEventListener('click',resetPage);
 
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  btn.style.display='none';
+  statusEl.style.display='block';
+  await wait(1000);
+  statusEl.style.display='none';
   
-  const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
-  let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
+  const map=new Map();
+  ranks.forEach((r,i)=>map.set(norm(r),i+1));
+
+  let resultData=answers.map((t,i)=>({
+    text:t, rank:map.get(norm(t))||null, group:i+1, score:map.get(norm(t))||0
+  })).filter(r=>r.text.trim()!=="");
 
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
@@ -198,12 +101,12 @@ btn.addEventListener('click',async()=>{
     await wait(500);
     card.classList.add('show');
 
-    // ✅ เล่นเสียง
+    // 🔊 เล่นเสียงตามผล
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
-    
-    // ✅ เลื่อนอัตโนมัติเมื่อมี card ใหม่
-    card.scrollIntoView({behavior:'smooth',block:'end'});
+
+    // 🔽 เลื่อนอัตโนมัติให้เห็นการ์ดล่าสุด
+    card.scrollIntoView({behavior:'smooth',block:'center'});
   }
 
   scoreData = groupScores.map((s, i) => ({
@@ -215,31 +118,33 @@ btn.addEventListener('click',async()=>{
 });
 
 showScoreBtn.addEventListener('click',async()=>{
-  // ซ่อนหัวข้อและปุ่มบน
   pageTitle.style.opacity='0';
   topButtons.style.display='none';
   results.style.display='none';
   showScoreBtn.style.display='none';
 
-  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`; 
+  scoreTable.innerHTML=`
+    <h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
+    <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`;
   const tbody=scoreTable.querySelector('tbody');
-  
+
   for(const [idx,row] of scoreData.entries()){
     const tr=document.createElement('tr');
     tr.className='table-row';
     tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
     tbody.appendChild(tr);
-    await wait(400);
+    await wait(500);
     tr.classList.add('show');
-    soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
-    // ✅ เลื่อนอัตโนมัติเมื่อแถวใหม่ขึ้น
-    tr.scrollIntoView({behavior:'smooth',block:'end'});
+
+    // 🔊 เล่นเสียง Ding ตอนอันดับแต่ละกลุ่มขึ้น
+    soundCorrect.currentTime=0;
+    soundCorrect.play().catch(()=>{});
+
+    // 🔽 เลื่อนอัตโนมัติให้เห็นแถวล่าสุด
+    tr.scrollIntoView({behavior:'smooth',block:'center'});
   }
 
   saveContainer.style.display='flex';
-  footerButtons.style.display='flex'; // แสดงปุ่มด้านล่างหลังตาราง
+  footerButtons.style.display='flex';
 });
 </script>
-</body>
-</html>
