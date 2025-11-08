@@ -156,16 +156,18 @@ select {
     <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
 
     <div id="results"></div>
-    <div id="scoreTable"></div>
-
-    <div id="saveContainer">
-      <select id="gameSelect">
-        <option value="">-- เลือกเกมที่จะบันทึก --</option>
-        <option value="เกมที่ 1">เกมที่ 1</option>
-        <option value="เกมที่ 2">เกมที่ 2</option>
-        <option value="เกมที่ 3">เกมที่ 3</option>
-      </select>
-      <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
+    <div id="scoreSection" style="display:none;">
+      <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
+      <div id="scoreTable"></div>
+      <div id="saveContainer">
+        <select id="gameSelect">
+          <option value="">-- เลือกเกมที่จะบันทึก --</option>
+          <option value="เกมที่ 1">เกมที่ 1</option>
+          <option value="เกมที่ 2">เกมที่ 2</option>
+          <option value="เกมที่ 3">เกมที่ 3</option>
+        </select>
+        <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
+      </div>
     </div>
   </div>
 
@@ -186,9 +188,13 @@ const saveBtn=document.getElementById('saveBtn');
 const gameSelect=document.getElementById('gameSelect');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
+const scoreSection=document.getElementById('scoreSection');
+const showScoreBtn=document.getElementById('showScoreBtn');
+
+let scoreData=[];
 
 backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
-resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';saveContainer.style.display='none';btn.style.display='block';});
+resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';saveContainer.style.display='none';btn.style.display='block';scoreSection.style.display='none';});
 
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
@@ -210,7 +216,15 @@ btn.addEventListener('click',async()=>{
     results.appendChild(card);
   }
 
-  const scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
+  scoreSection.style.display='block';
+});
+
+showScoreBtn.addEventListener('click',()=>{
+  // ซ่อนเฉลย แล้วแสดงตารางคะแนน
+  results.style.display='none';
+  showScoreBtn.style.display='none';
+
   let tableHTML=`<table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนนรวม</th></tr></thead><tbody>`;
   scoreData.forEach((r,idx)=>{tableHTML+=`<tr><td>${idx+1}</td><td>${r.group}</td><td>${r.score}</td></tr>`;});
   tableHTML+=`</tbody></table>`;
@@ -225,15 +239,9 @@ saveBtn.addEventListener('click', () => {
   const game = gameSelect.value;
   if (!game) return alert("⚠️ กรุณาเลือกเกมก่อนบันทึก");
 
-  const tableRows = scoreTable.querySelectorAll("tbody tr");
-  if (!tableRows.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
+  if (!scoreData.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
 
-  const scores = Array.from(tableRows).map(row => ({
-    group: row.children[1].innerText.trim(),
-    score: parseFloat(row.children[2].innerText.trim())
-  }));
-
-  const payload = { game, scores };
+  const payload = { game, scores: scoreData };
 
   fetch(scriptURL, {
     method: "POST",
@@ -249,4 +257,3 @@ saveBtn.addEventListener('click', () => {
 </script>
 </body>
 </html>
-
