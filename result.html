@@ -15,6 +15,7 @@
   --text: #ffffff;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
   height: 100vh; width: 100vw;
   display: flex; justify-content: center; align-items: center;
@@ -22,15 +23,23 @@ body {
   font-family: "Mitr", sans-serif; color: var(--text);
   overflow: hidden;
 }
+
 .container {
-  width: 90vw; height: 90vh;
+  width: 90vw;
+  min-height: 90vh; /* ✅ ใช้ min-height เพื่อให้เลื่อนลงได้ */
   background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-  display: flex; flex-direction: column; align-items: center;
-  padding: 20px 30px; overflow-y: auto; position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* ✅ ให้อยู่กึ่งกลางแนวตั้ง */
+  align-items: center;     /* ✅ ให้อยู่กึ่งกลางแนวนอน */
+  padding: 20px 30px;
+  overflow-y: auto;
+  position: relative;
 }
+
 h1 {
   color: var(--highlight);
   text-shadow: 2px 2px 0 #000;
@@ -39,58 +48,99 @@ h1 {
   margin-bottom: 20px;
   transition: opacity 0.5s ease;
 }
+
 button {
-  background: var(--highlight); color: #05245a;
-  border: none; border-radius: 10px;
-  padding: 12px 22px; font-size: 18px; font-weight: 700;
-  cursor: pointer; margin: 8px;
+  background: var(--highlight);
+  color: #05245a;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 8px;
   transition: transform 0.15s;
 }
 button:hover { transform: scale(1.05); }
+
 .button-group {
-  display: flex; justify-content: center; align-items: center;
-  flex-wrap: wrap; gap: 10px; margin: 10px 0 20px 0;
-  width: 100%; text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  width: 100%;
+  text-align: center;
 }
+
 .card-result {
   background: rgba(255, 255, 255, 0.1);
   border: 2px solid var(--highlight);
   border-radius: 15px;
   padding: 12px 20px;
   margin: 10px auto;
-  width: 95%; max-width: 800px;
-  display: flex; justify-content: space-between; align-items: center;
-  opacity: 0; transform: translateY(20px);
+  width: 95%;
+  max-width: 800px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(20px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .card-result.show { opacity: 1; transform: translateY(0); }
+
 .rank-badge {
-  background: var(--highlight); color: #012a66;
-  padding: 8px 12px; border-radius: 10px;
-  font-weight: bold; min-width: 80px; text-align: center;
+  background: var(--highlight);
+  color: #012a66;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: bold;
+  min-width: 80px;
+  text-align: center;
 }
 .notfound {
   background: #ff4f4f !important;
   color: #fff !important;
 }
-#results, #scoreTable { width: 100%; text-align: center; margin-top: 20px; }
+
+#results, #scoreTable {
+  width: 100%;
+  text-align: center;
+  margin-top: 20px;
+}
+
 table {
-  width: 90%; margin: 15px auto;
+  width: 90%;
+  margin: 15px auto;
   border-collapse: collapse;
-  background: #ffffff; color: #05245a;
-  border-radius: 12px; overflow: hidden;
+  background: #ffffff;
+  color: #05245a;
+  border-radius: 12px;
+  overflow: hidden;
 }
 th, td { border: 1px solid #ccc; padding: 10px 12px; font-size: 18px; }
 th { background: var(--highlight); color: #05245a; }
+
 .table-row {
   opacity: 0; transform: translateY(20px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
 .table-row.show { opacity: 1; transform: translateY(0); }
-#saveContainer { display: none; margin-top: 25px; flex-direction: column; align-items: center; }
+
+#saveContainer {
+  display: none;
+  margin-top: 25px;
+  flex-direction: column;
+  align-items: center;
+}
 #footerButtons {
-  display: none; justify-content: center; align-items: center;
-  gap: 15px; margin-top: 20px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
 }
 
 /* 🏆 Leaderboard Popup */
@@ -99,26 +149,29 @@ th { background: var(--highlight); color: #05245a; }
   position: fixed;
   top: 0; left: 0; width: 100%; height: 100%;
   background: rgba(0,0,0,0.7);
-  justify-content: center; align-items: center;
+  justify-content: center;
+  align-items: center;
   animation: fadeIn 0.3s ease;
   z-index: 999;
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
 #leaderboardBox {
   background: var(--bg1);
   border: 4px solid var(--highlight);
   border-radius: 20px;
   padding: 30px;
   text-align: center;
-  width: 90%; max-width: 500px;
+  width: 90%;
+  max-width: 500px;
   box-shadow: 0 0 25px rgba(255,255,255,0.3);
   animation: slideUp 0.4s ease;
 }
 @keyframes slideUp { from { transform: translateY(50px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
 #leaderboardBox h2 { color: var(--highlight); margin-bottom: 10px; }
-#leaderboardBox img {
-  width: 150px; margin-bottom: 15px;
-}
+#leaderboardBox img { width: 150px; margin-bottom: 15px; }
+
 .leader-item {
   background: var(--highlight);
   color: #012a66;
@@ -132,7 +185,8 @@ th { background: var(--highlight); color: #05245a; }
   justify-content: space-between;
 }
 #closeLeaderboard {
-  background: #fff; color: #05245a;
+  background: #fff;
+  color: #05245a;
   margin-top: 15px;
 }
 </style>
@@ -241,7 +295,7 @@ btn.onclick=async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(400);
+    await wait(600);
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
@@ -267,7 +321,7 @@ showScoreBtn.onclick=async()=>{
     tr.className='table-row';
     tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
     tbody.appendChild(tr);
-    await wait(400);
+    await wait(600);
     tr.classList.add('show');
     soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
     tr.scrollIntoView({behavior:"smooth",block:"center"});
@@ -277,16 +331,13 @@ showScoreBtn.onclick=async()=>{
   footerButtons.style.display='flex';
 
   await wait(800);
-  // 🏆 แสดง Leaderboard Popup
   leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
     `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
   leaderboardPopup.style.display='flex';
   soundCorrect.play().catch(()=>{});
 };
 
-closeLeaderboard.onclick=()=>{
-  leaderboardPopup.style.display='none';
-};
+closeLeaderboard.onclick=()=>{ leaderboardPopup.style.display='none'; };
 </script>
 </body>
 </html>
