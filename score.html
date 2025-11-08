@@ -61,6 +61,9 @@ button.show{
   <button id="backBtn">⬅️ กลับหน้าแรก</button>
   <button id="revealBtn">📋 กลับไปดูเฉลย</button>
   <button id="saveTxtBtn">💾 บันทึก TXT</button>
+
+  <!-- 🔊 เพิ่มเสียงจบการแสดง -->
+  <audio id="finishSound" src="finish.mp3" preload="auto"></audio>
 </div>
 
 <script>
@@ -70,6 +73,7 @@ const scoreTable=document.getElementById('scoreTable');
 const backBtn=document.getElementById('backBtn');
 const revealBtn=document.getElementById('revealBtn');
 const saveTxtBtn=document.getElementById('saveTxtBtn');
+const finishSound=document.getElementById('finishSound');
 
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 
@@ -119,14 +123,15 @@ async function loadScores(){
   revealBtn.classList.add('show');
   await wait(200);
   saveTxtBtn.classList.add('show');
+
+  // 🔊 เล่นเสียงเมื่อแสดงผลเสร็จ
+  finishSound.currentTime = 0;
+  finishSound.play();
 }
 
 loadScores();
 
-// กลับหน้าแรก
 backBtn.onclick=()=>{localStorage.clear();location.href='index.html';};
-
-// กลับไปดูเฉลย
 revealBtn.onclick=()=>{location.href='result.html';};
 
 // ✅ ปุ่มบันทึกไฟล์ TXT
