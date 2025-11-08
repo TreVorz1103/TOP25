@@ -21,11 +21,11 @@ body{
   font-family:"Mitr",sans-serif;color:var(--text);overflow:hidden;
 }
 .container{
-  width:90vw;height:90vh;background:rgba(255,255,255,0.08);
+  width:95vw;height:95vh;background:rgba(255,255,255,0.08);
   border:5px solid var(--highlight);border-radius:20px;
   box-shadow:0 0 30px rgba(255,255,255,0.3);
-  display:flex;flex-direction:column;align-items:center;padding:20px 30px;overflow-y:auto;
-  position:relative;
+  display:flex;flex-direction:column;align-items:center;padding:20px 30px;
+  overflow:hidden;position:relative;
 }
 h1{
   color:var(--highlight);
@@ -41,22 +41,28 @@ button{
   transition:transform 0.15s;
 }
 button:hover{transform:scale(1.05);}
-.button-group {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin: 10px 0 20px 0;
-  width: 100%;
-  text-align: center;
-  transition:all 0.4s ease;
+
+#topButtons {
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-bottom:20px;
+  width:100%;
+  text-align:center;
 }
+
 .card-result{
-  background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
-  border-radius:15px;padding:12px 20px;margin:10px auto;width:95%;max-width:800px;
+  background:rgba(255,255,255,0.1);
+  border:2px solid var(--highlight);
+  border-radius:15px;
+  padding:12px 20px;
+  margin:10px auto;
+  width:95%;max-width:800px;
   display:flex;justify-content:space-between;align-items:center;
-  opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.4s ease,transform 0.4s ease;
 }
 .card-result.show{opacity:1;transform:translateY(0);}
 .rank-badge{
@@ -69,20 +75,28 @@ button:hover{transform:scale(1.05);}
 }
 #results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
 table{
-  width:85%;margin:15px auto;border-collapse:collapse;background:#ffffff;color:#05245a;
-  border-radius:12px;overflow:hidden;
+  width:90%;
+  max-width:1100px;
+  margin:15px auto;
+  border-collapse:collapse;
+  background:#ffffff;
+  color:#05245a;
+  border-radius:12px;
+  overflow:hidden;
+  font-size:18px;
 }
-th,td{border:1px solid #ccc;padding:10px 12px;font-size:16px;}
+th,td{border:1px solid #ccc;padding:10px 12px;height:40px;}
 th{background:var(--highlight);color:#05245a;}
 .table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
 .table-row.show{opacity:1;transform:translateY(0);}
 #saveContainer{display:none;margin-top:25px;flex-direction:column;align-items:center;}
-#footerButtons {
-  display: none;
-  justify-content: center;
-  align-items: center;
-  gap: 15px;
-  margin-top: 20px;
+#footerButtons{
+  display:none;
+  justify-content:center;
+  align-items:center;
+  gap:15px;
+  margin-top:auto;
+  padding-bottom:20px;
 }
 </style>
 </head>
@@ -90,7 +104,7 @@ th{background:var(--highlight);color:#05245a;}
 <div class="container">
   <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
 
-  <div class="button-group" id="topButtons">
+  <div id="topButtons">
     <button id="backBtn">⬅️ กลับหน้าแรก</button>
     <button id="resetBtn">🔄 รีเซ็ต</button>
     <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
@@ -99,22 +113,24 @@ th{background:var(--highlight);color:#05245a;}
   <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
   <div id="results"></div>
 
-  <div id="scoreSection" style="display:none;">
+  <div id="scoreSection" style="display:none;flex:1;display:flex;flex-direction:column;justify-content:center;">
     <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
     <div id="scoreTable"></div>
     <div id="saveContainer">
       <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
     </div>
-    <div id="footerButtons">
-      <button id="backBtnBottom">⬅️ กลับหน้าแรก</button>
-      <button id="resetBtnBottom">🔄 รีเซ็ต</button>
-    </div>
   </div>
-</div>
 
-<!-- 🔊 preload เสียง -->
-<audio id="soundCorrect" src="Ding.mp3" preload="auto"></audio>
-<audio id="soundWrong" src="Worng.mp3" preload="auto"></audio>
+  <!-- ปุ่มด้านล่าง -->
+  <div id="footerButtons">
+    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
+    <button id="resetBtn2">🔄 รีเซ็ต</button>
+  </div>
+
+  <!-- ที่ใส่เสียง -->
+  <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
+  <audio id="wrongSound" src="Wrong.mp3" preload="auto"></audio>
+</div>
 
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
@@ -137,35 +153,18 @@ const showScoreBtn=document.getElementById('showScoreBtn');
 const pageTitle=document.getElementById('pageTitle');
 const topButtons=document.getElementById('topButtons');
 const footerButtons=document.getElementById('footerButtons');
-const soundCorrect=document.getElementById('soundCorrect');
-const soundWrong=document.getElementById('soundWrong');
-const backBtnBottom=document.getElementById('backBtnBottom');
-const resetBtnBottom=document.getElementById('resetBtnBottom');
+const backBtn2=document.getElementById('backBtn2');
+const resetBtn2=document.getElementById('resetBtn2');
+
+const correctSound=document.getElementById('correctSound');
+const wrongSound=document.getElementById('wrongSound');
 
 let scoreData=[];
 
-function goHome(){
-  if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){
-    localStorage.clear();
-    location.href='index.html';
-  }
-}
-function resetPage(){
-  results.innerHTML='';
-  scoreTable.innerHTML='';
-  saveContainer.style.display='none';
-  btn.style.display='block';
-  scoreSection.style.display='none';
-  pageTitle.style.opacity='1';
-  topButtons.style.display='flex';
-  footerButtons.style.display='none';
-  results.style.display='block';
-}
-
-backBtn.addEventListener('click',goHome);
-backBtnBottom.addEventListener('click',goHome);
-resetBtn.addEventListener('click',resetPage);
-resetBtnBottom.addEventListener('click',resetPage);
+backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
+backBtn2.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
+resetBtn.addEventListener('click',()=>{location.reload();});
+resetBtn2.addEventListener('click',()=>{location.reload();});
 
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
@@ -193,40 +192,37 @@ btn.addEventListener('click',async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(500);
+    await wait(300);
     card.classList.add('show');
-    if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
-    else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
+    if(r.rank) correctSound.play(); else wrongSound.play();
   }
 
-  scoreData = groupScores.map((s, i) => ({
-    group: i + 1,
-    score: s || 0
-  })).sort((a, b) => b.score - a.score || a.group - b.group);
-
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).sort((a,b)=>b.score-a.score||a.group-b.group);
   scoreSection.style.display='block';
 });
 
 showScoreBtn.addEventListener('click',async()=>{
-  // ซ่อนหัวข้อและปุ่มบน
   pageTitle.style.opacity='0';
   topButtons.style.display='none';
-
   results.style.display='none';
   showScoreBtn.style.display='none';
+  footerButtons.style.display='flex';
+
   scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`; 
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>
+  </div>`;
+  
   const tbody=scoreTable.querySelector('tbody');
   for(const [idx,row] of scoreData.entries()){
     const tr=document.createElement('tr');
     tr.className='table-row';
     tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
     tbody.appendChild(tr);
-    await wait(400);
+    await wait(200);
     tr.classList.add('show');
   }
   saveContainer.style.display='flex';
-  footerButtons.style.display='flex'; // แสดงปุ่มด้านล่างหลังตาราง
 });
 
 saveBtn.addEventListener('click', () => {
