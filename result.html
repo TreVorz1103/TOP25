@@ -72,9 +72,19 @@ button:hover{transform:scale(1.05);}
   color:#fff !important;
 }
 #results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
+
+/* ✅ ปรับตารางให้เหมือนแบบแรก */
+#scoreTable {
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  flex-direction:column;
+}
+
 table{
-  width:90%;
-  max-width:1100px;
+  width:95%;
+  max-width:800px;
   margin:15px auto;
   border-collapse:collapse;
   background:#ffffff;
@@ -82,6 +92,7 @@ table{
   border-radius:12px;
   overflow:hidden;
   font-size:18px;
+  box-shadow:0 0 15px rgba(255,255,255,0.2);
 }
 th,td{border:1px solid #ccc;padding:10px 12px;height:40px;}
 th{background:var(--highlight);color:#05245a;}
@@ -193,8 +204,6 @@ btn.addEventListener('click',async()=>{
     await wait(400);
     card.classList.add('show');
     if(r.rank) correctSound.play(); else wrongSound.play();
-
-    // ✅ เลื่อนลงอัตโนมัติ
     card.scrollIntoView({ behavior: "smooth", block: "end" });
   }
 
@@ -222,7 +231,7 @@ showScoreBtn.addEventListener('click',async()=>{
     tbody.appendChild(tr);
     await wait(400);
     tr.classList.add('show');
-    correctSound.play(); // ✅ เล่นเสียง Ding ตอนอันดับขึ้น
+    correctSound.play();
   }
   saveContainer.style.display='flex';
 });
