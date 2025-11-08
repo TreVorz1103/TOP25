@@ -27,14 +27,13 @@ body {
 
 .container {
   width: 90vw;
-  min-height: 90vh;
+  height: 90vh;
   background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
   padding: 20px 30px;
   overflow-y: auto;
@@ -47,7 +46,6 @@ h1 {
   font-size: 2.5em;
   text-align: center;
   margin-bottom: 20px;
-  transition: opacity 0.5s ease;
 }
 
 button {
@@ -106,16 +104,31 @@ button:hover { transform: scale(1.05); }
   color: #fff !important;
 }
 
+/* 🏆 การ์ดสรุปคะแนน */
 #scoreCards {
   display: flex;
   flex-direction: column;
   gap: 10px;
   margin-top: 20px;
+  width: 100%;
 }
-#scoreCards .card-result {
-  opacity: 1 !important;
-  transform: none !important;
+#scoreCards .score-card {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid var(--highlight);
+  border-radius: 15px;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 600;
+  width: 95%;
+  max-width: 800px;
+  margin: auto;
+  transition: transform 0.3s ease;
 }
+#scoreCards .score-card:hover { transform: scale(1.02); }
+#scoreCards .rank-icon { font-size: 28px; margin-right: 10px; }
 
 #saveContainer {
   display: none;
@@ -257,7 +270,8 @@ document.getElementById('resetBtnBottom').onclick=resetPage;
 
 btn.onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  topButtons.style.display='none';
+  statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
@@ -284,50 +298,43 @@ btn.onclick=async()=>{
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
-    card.scrollIntoView({behavior:"smooth",block:"center"});
+    card.scrollIntoView({behavior:"smooth",block:"nearest"});
   }
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-b.group);
   scoreSection.style.display='block';
-  topButtons.style.display='none';
-  footerButtons.style.display='flex';
+  topButtons.style.display='flex';
 };
 
 showScoreBtn.onclick=async()=>{
   pageTitle.style.display='none';
   results.style.display='none';
   showScoreBtn.style.display='none';
+  topButtons.style.display='none';
 
+  const icons=["🏆","🥈","🥉"];
   scoreTable.innerHTML=`
     <h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนนทั้งหมด 🏆</h2>
     <div id="scoreCards"></div>
   `;
-  
   const container=document.getElementById("scoreCards");
-  const icons=["🏆","🥈","🥉"];
 
-  container.innerHTML=scoreData.map((row,i)=>{
+  container.innerHTML=scoreData.map((r,i)=>{
     const icon=icons[i]||"⭐";
     return `
-      <div class="card-result show">
-        <div>
-          <div style="font-size:20px;font-weight:700;">${icon} กลุ่ม ${row.group}</div>
-          <div style="font-size:16px;color:#ddd;">
-            ${row.score>0?'ทำคะแนนได้':'<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}
-          </div>
-        </div>
-        <div class="rank-badge ${row.score===0?'notfound':''}">
-          ${row.score===0?'ไม่พบ':`${row.score} คะแนน`}
-        </div>
+      <div class="score-card">
+        <div><span class="rank-icon">${icon}</span>กลุ่ม ${r.group}</div>
+        <div>${r.score} คะแนน</div>
       </div>`;
   }).join("");
 
   saveContainer.style.display='flex';
   footerButtons.style.display='flex';
-  await wait(500);
-  container.lastElementChild.scrollIntoView({behavior:"smooth",block:"end"});
-  await wait(1000);
 
+  await wait(600);
+  container.lastElementChild.scrollIntoView({behavior:"smooth",block:"end"});
+
+  await wait(1000);
   leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
     `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
   leaderboardPopup.style.display='flex';
