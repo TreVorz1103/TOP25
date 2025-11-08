@@ -45,8 +45,8 @@ button:hover{transform:scale(1.05);}
   font-weight:bold;min-width:80px;text-align:center;
 }
 .notfound{
-  background:#ff4f4f;color:#fff;padding:8px 12px;border-radius:10px;
-  font-weight:bold;min-width:80px;text-align:center;
+  background:#ff4f4f !important;
+  color:#fff !important;
 }
 #results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
 table{
@@ -57,8 +57,11 @@ th,td{border:1px solid #ccc;padding:10px 12px;font-size:16px;}
 th{background:var(--highlight);color:#05245a;}
 .table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
 .table-row.show{opacity:1;transform:translateY(0);}
-#saveContainer{display:none;margin-top:25px;display:flex;flex-direction:column;align-items:center;}
-input[type="text"]{padding:6px 10px;border-radius:6px;border:2px solid var(--highlight);margin-top:10px;width:250px;}
+#saveContainer{display:none;margin-top:25px;flex-direction:column;align-items:center;}
+input[type="text"]{
+  padding:6px 10px;border-radius:6px;border:2px solid var(--highlight);
+  margin-top:10px;width:250px;display:none; /* ซ่อนตอนเริ่มต้น */
+}
 </style>
 </head>
 <body>
@@ -114,7 +117,7 @@ const showScoreBtn=document.getElementById('showScoreBtn');
 let scoreData=[];
 
 backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
-resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';saveContainer.style.display='none';btn.style.display='block';scoreSection.style.display='none';});
+resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';saveContainer.style.display='none';btn.style.display='block';scoreSection.style.display='none';effectURL.style.display='none';});
 
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
@@ -126,7 +129,6 @@ btn.addEventListener('click',async()=>{
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
 
-  // เรียงอันดับ: ไม่พบ → ต่ำ → สูง
   const notFound = resultData.filter(r=>!r.rank);
   const ranked = resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
   resultData = [...notFound,...ranked];
@@ -135,15 +137,16 @@ btn.addEventListener('click',async()=>{
     groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
-    card.innerHTML=`<div>
+    card.innerHTML=`
+      <div>
         <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
         <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
       </div>
-      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="notfound">❌</div>`}`;
+      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">❌ ไม่พบ</div>`}
+    `;
     results.appendChild(card);
     await wait(500);
     card.classList.add('show');
-    // เล่นเสียงถ้ามี URL ใส่เอง
     if(effectURL.value){
       const audio = new Audio(effectURL.value);
       audio.play();
@@ -172,6 +175,7 @@ showScoreBtn.addEventListener('click',async()=>{
     if(idx===0) cheer.play(); else ding.play();
   }
   saveContainer.style.display='flex';
+  effectURL.style.display='block'; // แสดงช่อง URL ตอนท้าย
 });
 
 saveBtn.addEventListener('click', () => {
