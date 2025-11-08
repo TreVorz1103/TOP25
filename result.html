@@ -27,17 +27,16 @@ body {
 
 .container {
   width: 90vw;
-  min-height: 90vh; /* ✅ ใช้ min-height เพื่อให้เลื่อนลงได้ */
+  height: 90vh;
   background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
-  justify-content: center; /* ✅ ให้อยู่กึ่งกลางแนวตั้ง */
-  align-items: center;     /* ✅ ให้อยู่กึ่งกลางแนวนอน */
+  align-items: center;
   padding: 20px 30px;
-  overflow-y: auto;
+  overflow-y: auto; /* ✅ เลื่อนในกรอบได้ */
   position: relative;
 }
 
@@ -113,7 +112,7 @@ button:hover { transform: scale(1.05); }
 }
 
 table {
-  width: 90%;
+  width: 95%; /* ✅ ขยายตารางนิดหน่อย */
   margin: 15px auto;
   border-collapse: collapse;
   background: #ffffff;
@@ -121,7 +120,7 @@ table {
   border-radius: 12px;
   overflow: hidden;
 }
-th, td { border: 1px solid #ccc; padding: 10px 12px; font-size: 18px; }
+th, td { border: 1px solid #ccc; padding: 12px 14px; font-size: 18px; }
 th { background: var(--highlight); color: #05245a; }
 
 .table-row {
@@ -273,7 +272,8 @@ document.getElementById('resetBtnBottom').onclick=resetPage;
 
 btn.onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  topButtons.style.display='none'; // ✅ ซ่อนปุ่มทั้งหมดชั่วคราว
+  statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
@@ -296,12 +296,15 @@ btn.onclick=async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(600);
+    await wait(700); // ✅ หน่วงเวลา 0.7 วิ
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
-    card.scrollIntoView({behavior:"smooth",block:"center"});
+    card.scrollIntoView({behavior:"smooth",block:"nearest"});
   }
+
+  // ✅ แสดงปุ่มอีกครั้งเมื่อจบการเฉลยทั้งหมด
+  topButtons.style.display='flex';
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-a.group);
   scoreSection.style.display='block';
@@ -322,10 +325,10 @@ showScoreBtn.onclick=async()=>{
     tr.className='table-row';
     tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
     tbody.appendChild(tr);
-    await wait(600);
+    await wait(700);
     tr.classList.add('show');
     soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
-    tr.scrollIntoView({behavior:"smooth",block:"center"});
+    tr.scrollIntoView({behavior:"smooth",block:"nearest"});
   }
 
   saveContainer.style.display='flex';
@@ -342,5 +345,3 @@ closeLeaderboard.onclick=()=>{ leaderboardPopup.style.display='none'; };
 </script>
 </body>
 </html>
-
-
