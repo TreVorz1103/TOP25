@@ -50,15 +50,18 @@
       text-align: left;
       width: 90%;
       max-width: 700px;
-      transition: transform 0.3s ease;
       display: flex;
       justify-content: space-between;
       align-items: center;
       flex-wrap: wrap;
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s ease;
     }
 
-    .answer-card:hover {
-      transform: scale(1.03);
+    .answer-card.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .group-name {
@@ -191,27 +194,33 @@
 
     const container = document.getElementById("answers-container");
 
-    // แสดงเฉลยทั้งหมดทีเดียว
-    answers.forEach(ans => {
-      const div = document.createElement("div");
-      div.className = "answer-card";
-      div.innerHTML = `
-        <div>
-          <div class="group-name">${ans.name}</div>
-          <div class="group-detail">กลุ่ม ${ans.group} — ${ans.result}</div>
-        </div>
-        <button class="wrong-btn">ไม่พบ</button>
-      `;
-      container.appendChild(div);
+    // แสดงเฉลยทีละอัน พร้อมหน่วงเวลา 0.7 วิ
+    let delay = 700;
+    answers.forEach((ans, index) => {
+      setTimeout(() => {
+        const div = document.createElement("div");
+        div.className = "answer-card";
+        div.innerHTML = `
+          <div>
+            <div class="group-name">${ans.name}</div>
+            <div class="group-detail">กลุ่ม ${ans.group} — ${ans.result}</div>
+          </div>
+          <button class="wrong-btn">ไม่พบ</button>
+        `;
+        container.appendChild(div);
+
+        // ให้แสดงทีละใบ (มีอนิเมชัน)
+        setTimeout(() => div.classList.add("show"), 50);
+
+        // เลื่อนลงอัตโนมัติ
+        window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
+
+        // ถ้าเป็นอันสุดท้ายแล้ว -> แสดง Leaderboard
+        if (index === answers.length - 1) {
+          setTimeout(() => showLeaderboard(), 1500);
+        }
+      }, index * delay);
     });
-
-    // เลื่อนลงอัตโนมัติ
-    window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
-
-    // แสดง Leaderboard หลังจาก 2.5 วินาที
-    setTimeout(() => {
-      showLeaderboard();
-    }, 2500);
 
     function showLeaderboard() {
       const lb = document.getElementById("leaderboard");
