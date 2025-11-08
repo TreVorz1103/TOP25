@@ -57,11 +57,8 @@ th,td{border:1px solid #ccc;padding:10px 12px;font-size:16px;}
 th{background:var(--highlight);color:#05245a;}
 .table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
 .table-row.show{opacity:1;transform:translateY(0);}
-#saveContainer{display:none;margin-top:25px;}
-select{
-  padding:8px 10px;border-radius:8px;border:2px solid var(--highlight);
-  background:#fff7d0;color:#05245a;font-size:16px;margin-right:10px;
-}
+#saveContainer{display:none;margin-top:25px;display:flex;flex-direction:column;align-items:center;}
+input[type="text"]{padding:6px 10px;border-radius:6px;border:2px solid var(--highlight);margin-top:10px;width:250px;}
 </style>
 </head>
 <body>
@@ -80,26 +77,21 @@ select{
     <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
     <div id="scoreTable"></div>
     <div id="saveContainer">
-      <select id="gameSelect">
-        <option value="">-- เลือกเกมที่จะบันทึก --</option>
-        <option value="เกมที่ 1">เกมที่ 1</option>
-        <option value="เกมที่ 2">เกมที่ 2</option>
-        <option value="เกมที่ 3">เกมที่ 3</option>
-      </select>
-      <button id="saveBtn">💾 บันทึกลง Google Sheet</button>
+      <input type="text" id="effectURL" placeholder="ใส่ URL เสียงเอฟเฟกต์ (ตัวเลือก)">
+      <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
     </div>
   </div>
 </div>
 
 <!-- เสียงเอฟเฟกต์ -->
-<audio id="ding" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c0b4ac7780.mp3?filename=notification-2-144459.mp3"></audio>
-<audio id="pop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0c2b0dcb2b.mp3?filename=pop-94319.mp3"></audio>
-<audio id="cheer" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b28b799c1f.mp3?filename=success-1-6297.mp3"></audio>
+<audio id="ding"></audio>
+<audio id="pop"></audio>
+<audio id="cheer"></audio>
 
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 function norm(s){return (s||'').toLowerCase().trim();}
-function escapeHtml(s){return s.replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
+function escapeHtml(s){return (s||'').replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[m]));}
 
 const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
@@ -113,7 +105,7 @@ const results=document.getElementById('results');
 const scoreTable=document.getElementById('scoreTable');
 const saveContainer=document.getElementById('saveContainer');
 const saveBtn=document.getElementById('saveBtn');
-const gameSelect=document.getElementById('gameSelect');
+const effectURL=document.getElementById('effectURL');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
 const scoreSection=document.getElementById('scoreSection');
@@ -127,27 +119,37 @@ resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
   btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
 
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
 
-  for(const [index, r] of resultData.entries()){
+  // เรียงอันดับ: ไม่พบ → ต่ำ → สูง
+  const notFound = resultData.filter(r=>!r.rank);
+  const ranked = resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
+  resultData = [...notFound,...ranked];
+
+  for(const r of resultData){
     groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
-    card.innerHTML=`
-      <div>
+    card.innerHTML=`<div>
         <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
         <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
       </div>
-      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="notfound">❌</div>`}
-    `;
+      ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="notfound">❌</div>`}`;
     results.appendChild(card);
-    await wait(750);
+    await wait(500);
     card.classList.add('show');
-    if(r.rank) ding.play(); else pop.play();
+    // เล่นเสียงถ้ามี URL ใส่เอง
+    if(effectURL.value){
+      const audio = new Audio(effectURL.value);
+      audio.play();
+    } else {
+      if(r.rank) ding.play(); else pop.play();
+    }
   }
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
@@ -165,44 +167,22 @@ showScoreBtn.addEventListener('click',async()=>{
     tr.className='table-row';
     tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
     tbody.appendChild(tr);
-    await wait(750);
+    await wait(500);
     tr.classList.add('show');
     if(idx===0) cheer.play(); else ding.play();
   }
-  saveContainer.style.display='block';
+  saveContainer.style.display='flex';
 });
 
-// ✅ ใส่ URL Script ของ Thanaphat ตรงนี้
-const scriptURL = "https://script.google.com/macros/s/AKfycbzJzfs86sfFj7KOOfFlH4s2AhOiO0QpOw0sx_guAAocIMIIw6OmLPv9c_WygaEIO1Dhzg/exec";
-
 saveBtn.addEventListener('click', () => {
-  const game = gameSelect.value;
-  if (!game) return alert("⚠️ กรุณาเลือกเกมก่อนบันทึก");
-  if (!scoreData.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
-  const payload = { game, scores: scoreData };
-
-  fetch(scriptURL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  })
-  .then(res => res.text())
-  .then(text => {
-    console.log("Script response:", text);
-    if (text.includes("✅")) {
-      cheer.play();
-      alert("✅ บันทึกข้อมูลสำเร็จ!");
-    } else {
-      alert("❌ เกิดข้อผิดพลาดจากฝั่ง Script:\n" + text);
-    }
-  })
-  .catch(err => {
-    console.error("Fetch error:", err);
-    alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อกับ Google Script");
-  });
+  if(!scoreData.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
+  const txtContent = scoreData.map(r=>`กลุ่ม ${r.group} : ${r.score} คะแนน`).join("\n");
+  const blob = new Blob([txtContent], {type: "text/plain;charset=utf-8"});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `score_${new Date().toISOString().slice(0,10)}.txt`;
+  a.click();
 });
 </script>
 </body>
 </html>
-
-
