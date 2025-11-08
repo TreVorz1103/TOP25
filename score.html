@@ -106,7 +106,7 @@ footer{font-size:14px;color:#aaa;margin-top:15px;opacity:0.6;}
     <button id="saveSheetBtn">📤 บันทึก Google Sheet</button>
   </div>
 
-  <footer>© 2025 TOP25 Quiz System</footer>
+  <footer>© TOP25 THP</footer>
   <audio id="finishSound" src="finish.mp3" preload="auto"></audio>
 </div>
 
@@ -211,7 +211,7 @@ saveSheetBtn.onclick=async()=>{
                   selectedSet===3 ? "เกมที่ 3" : null;
   if(!gameCol){ alert("⚠️ กรุณาเลือกชุดก่อนเริ่มเกม"); return; }
 
-  const payload = { sheet:"TOP25", game:gameCol, data:scoreData };
+  const payload = { sheet:"คะแนน", game:gameCol, data:scoreData };
 
   try{
     const res = await fetch(
@@ -233,3 +233,4 @@ saveSheetBtn.onclick=async()=>{
 </script>
 </body>
 </html>
+
