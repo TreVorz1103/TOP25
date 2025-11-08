@@ -33,6 +33,16 @@ button{
   transition:transform 0.15s;
 }
 button:hover{transform:scale(1.05);}
+.button-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 10px 0 20px 0;
+  width: 100%;
+  text-align: center;
+}
 .card-result{
   background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
   border-radius:15px;padding:12px 20px;margin:10px auto;width:95%;max-width:800px;
@@ -67,7 +77,9 @@ input[type="text"]{
 <body>
 <div class="container">
   <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
-  <div style="display:flex;flex-wrap:wrap;justify-content:center;">
+
+  <!-- ปุ่มสามปุ่ม จัดกลางด้วย .button-group -->
+  <div class="button-group">
     <button id="backBtn">⬅️ กลับหน้าแรก</button>
     <button id="resetBtn">🔄 รีเซ็ต</button>
     <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
