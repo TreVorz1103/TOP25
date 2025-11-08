@@ -53,7 +53,7 @@ button:hover { transform: scale(1.05); }
   width: 100%; text-align: center;
 }
 .card-result {
-  background: rgba(255, 255, 255, 0.1);
+  background: #1b4ba2;
   border: 2px solid var(--highlight);
   border-radius: 15px;
   padding: 12px 20px;
@@ -74,23 +74,29 @@ button:hover { transform: scale(1.05); }
   color: #fff !important;
 }
 #results, #scoreTable { width: 100%; text-align: center; margin-top: 20px; }
-table {
-  width: 90%; margin: 15px auto;
-  border-collapse: collapse;
-  background: #ffffff; color: #05245a;
-  border-radius: 12px; overflow: hidden;
-}
-th, td { border: 1px solid #ccc; padding: 10px 12px; font-size: 18px; }
-th { background: var(--highlight); color: #05245a; }
-.table-row {
+
+/* ✅ กล่องสรุปผลคะแนนแนวนอน */
+.score-box {
+  background: #1b4ba2;
+  border: 2px solid var(--highlight);
+  border-radius: 15px;
+  padding: 15px 25px;
+  margin: 10px auto;
+  width: 95%; max-width: 700px;
+  display: flex; justify-content: space-between; align-items: center;
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 600;
   opacity: 0; transform: translateY(20px);
   transition: opacity 0.4s ease, transform 0.4s ease;
 }
-.table-row.show { opacity: 1; transform: translateY(0); }
-#saveContainer { display: none; margin-top: 25px; flex-direction: column; align-items: center; }
-#footerButtons {
-  display: none; justify-content: center; align-items: center;
-  gap: 15px; margin-top: 20px;
+.score-box.show { opacity: 1; transform: translateY(0); }
+.score-rank {
+  background: var(--highlight);
+  color: #05245a;
+  border-radius: 10px;
+  padding: 8px 16px;
+  font-weight: bold;
 }
 
 /* 🏆 Leaderboard Popup */
@@ -110,7 +116,7 @@ th { background: var(--highlight); color: #05245a; }
   border-radius: 20px;
   padding: 30px;
   text-align: center;
-  width: 90%; max-width: 500px;
+  width: 90%; max-width: 550px;
   box-shadow: 0 0 25px rgba(255,255,255,0.3);
   animation: slideUp 0.4s ease;
 }
@@ -153,10 +159,7 @@ th { background: var(--highlight); color: #05245a; }
   <div id="scoreSection" style="display:none;">
     <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
     <div id="scoreTable"></div>
-    <div id="saveContainer">
-      <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
-    </div>
-    <div id="footerButtons">
+    <div id="footerButtons" style="display:none; margin-top:20px;">
       <button id="backBtnBottom">⬅️ กลับหน้าแรก</button>
       <button id="resetBtnBottom">🔄 รีเซ็ต</button>
     </div>
@@ -167,7 +170,7 @@ th { background: var(--highlight); color: #05245a; }
 <div id="leaderboardPopup">
   <div id="leaderboardBox">
     <img src="podium.png" alt="podium">
-    <h2>🏅 TOP 5 LEADERBOARD 🏅</h2>
+    <h2>🏅 TOP 18 LEADERBOARD 🏅</h2>
     <div id="leaderboardList"></div>
     <button id="closeLeaderboard">ปิด</button>
   </div>
@@ -192,20 +195,6 @@ document.body.addEventListener('click',()=>{
   soundWrong.play().catch(()=>{});soundWrong.pause();
 },{once:true});
 
-const btn=document.getElementById('checkBtn');
-const results=document.getElementById('results');
-const statusEl=document.getElementById('status');
-const scoreSection=document.getElementById('scoreSection');
-const showScoreBtn=document.getElementById('showScoreBtn');
-const pageTitle=document.getElementById('pageTitle');
-const topButtons=document.getElementById('topButtons');
-const scoreTable=document.getElementById('scoreTable');
-const saveContainer=document.getElementById('saveContainer');
-const footerButtons=document.getElementById('footerButtons');
-const leaderboardPopup=document.getElementById('leaderboardPopup');
-const leaderboardList=document.getElementById('leaderboardList');
-const closeLeaderboard=document.getElementById('closeLeaderboard');
-
 let scoreData=[];
 
 function goHome(){ if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){ localStorage.clear(); location.href='index.html'; } }
@@ -216,13 +205,17 @@ document.getElementById('backBtnBottom').onclick=goHome;
 document.getElementById('resetBtn').onclick=resetPage;
 document.getElementById('resetBtnBottom').onclick=resetPage;
 
-btn.onclick=async()=>{
+document.getElementById('checkBtn').onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  document.getElementById('checkBtn').style.display='none';
+  document.getElementById('status').style.display='block';
+  await wait(1000);
+  document.getElementById('status').style.display='none';
   
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
 
+  const results=document.getElementById('results');
   results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
   const notFound=resultData.filter(r=>!r.rank);
@@ -241,51 +234,46 @@ btn.onclick=async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(400);
+    await wait(300);
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
-    card.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-a.group);
-  scoreSection.style.display='block';
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-b.group);
+  document.getElementById('scoreSection').style.display='block';
 };
 
-showScoreBtn.onclick=async()=>{
-  pageTitle.style.display='none';
-  topButtons.style.display='none';
-  results.style.display='none';
-  showScoreBtn.style.display='none';
+document.getElementById('showScoreBtn').onclick=async()=>{
+  document.getElementById('results').style.display='none';
+  document.getElementById('showScoreBtn').style.display='none';
 
-  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`;
-  const tbody=scoreTable.querySelector('tbody');
+  const scoreTable=document.getElementById('scoreTable');
+  scoreTable.innerHTML='<h2 style="color:var(--highlight);margin-bottom:10px;">🏆 สรุปผลคะแนนทั้งหมด 🏆</h2>';
 
   for(const [idx,row] of scoreData.entries()){
-    const tr=document.createElement('tr');
-    tr.className='table-row';
-    tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
-    tbody.appendChild(tr);
-    await wait(400);
-    tr.classList.add('show');
+    const box=document.createElement('div');
+    box.className='score-box';
+    box.innerHTML=`<div>อันดับ ${idx+1} — กลุ่ม ${row.group}</div><div class="score-rank">${row.score} คะแนน</div>`;
+    scoreTable.appendChild(box);
+    await wait(300);
+    box.classList.add('show');
     soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
-    tr.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
-  saveContainer.style.display='flex';
-  footerButtons.style.display='flex';
+  document.getElementById('footerButtons').style.display='flex';
 
-  await wait(800);
-  // 🏆 แสดง Leaderboard Popup
-  leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
+  // 🏆 Popup Leaderboard TOP 18
+  await wait(600);
+  const leaderboardList=document.getElementById('leaderboardList');
+  leaderboardList.innerHTML=scoreData.slice(0,18).map((r,i)=>
     `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
-  leaderboardPopup.style.display='flex';
+  document.getElementById('leaderboardPopup').style.display='flex';
   soundCorrect.play().catch(()=>{});
 };
 
-closeLeaderboard.onclick=()=>{
-  leaderboardPopup.style.display='none';
+document.getElementById('closeLeaderboard').onclick=()=>{
+  document.getElementById('leaderboardPopup').style.display='none';
 };
 </script>
 </body>
