@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>TOP25</title>
+<title>TOP25 | เฉลยคำตอบแต่ละกลุ่ม</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -33,6 +33,7 @@ h1{
   font-size:2.5em;
   text-align:center;
   margin-bottom:20px;
+  transition:opacity 0.5s ease;
 }
 button{
   background:var(--highlight);color:#05245a;border:none;border-radius:10px;
@@ -41,14 +42,8 @@ button{
 }
 button:hover{transform:scale(1.05);}
 #topButtons {
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-  gap:10px;
-  margin-bottom:20px;
-  width:100%;
-  text-align:center;
+  display:flex;justify-content:center;align-items:center;flex-wrap:wrap;
+  gap:10px;margin-bottom:20px;width:100%;text-align:center;
 }
 .card-result{
   background:rgba(255,255,255,0.1);
@@ -70,7 +65,23 @@ button:hover{transform:scale(1.05);}
   background:#ff4f4f !important;
   color:#fff !important;
 }
-#results{width:100%;text-align:center;margin-top:20px;}
+#results,#scoreTable{width:100%;text-align:center;margin-top:20px;}
+table{
+  width:90%;
+  max-width:1100px;
+  margin:15px auto;
+  border-collapse:collapse;
+  background:#ffffff;
+  color:#05245a;
+  border-radius:12px;
+  overflow:hidden;
+  font-size:18px;
+}
+th,td{border:1px solid #ccc;padding:10px 12px;height:40px;}
+th{background:var(--highlight);color:#05245a;}
+.table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
+.table-row.show{opacity:1;transform:translateY(0);}
+#saveContainer{display:none;margin-top:25px;flex-direction:column;align-items:center;}
 #footerButtons{
   display:none;
   justify-content:center;
@@ -83,7 +94,7 @@ button:hover{transform:scale(1.05);}
 </head>
 <body>
 <div class="container" id="container">
-  <h1>🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
+  <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
 
   <div id="topButtons">
     <button id="backBtn">⬅️ กลับหน้าแรก</button>
@@ -94,11 +105,20 @@ button:hover{transform:scale(1.05);}
   <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
   <div id="results"></div>
 
-  <div id="footerButtons">
-    <button id="scoreBtn">🏆 ดูสรุปคะแนน</button>
-    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
+  <div id="scoreSection" style="display:none;flex:1;flex-direction:column;justify-content:center;">
+    <button id="showScoreBtn">🏆 สรุปผลคะแนน</button>
+    <div id="scoreTable"></div>
+    <div id="saveContainer">
+      <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
+    </div>
   </div>
 
+  <div id="footerButtons">
+    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
+    <button id="resetBtn2">🔄 รีเซ็ต</button>
+  </div>
+
+  <!-- เสียง -->
   <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="Worng.mp3" preload="auto"></audio>
 </div>
@@ -111,32 +131,38 @@ function escapeHtml(s){return (s||'').replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt
 const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
-const checkBtn=document.getElementById('checkBtn');
+const btn=document.getElementById('checkBtn');
 const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
+const scoreTable=document.getElementById('scoreTable');
+const saveContainer=document.getElementById('saveContainer');
+const saveBtn=document.getElementById('saveBtn');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
+const scoreSection=document.getElementById('scoreSection');
+const showScoreBtn=document.getElementById('showScoreBtn');
+const pageTitle=document.getElementById('pageTitle');
+const topButtons=document.getElementById('topButtons');
+const footerButtons=document.getElementById('footerButtons');
 const backBtn2=document.getElementById('backBtn2');
-const scoreBtn=document.getElementById('scoreBtn');
+const resetBtn2=document.getElementById('resetBtn2');
+const container=document.getElementById('container');
+
 const correctSound=document.getElementById('correctSound');
 const wrongSound=document.getElementById('wrongSound');
 
 let scoreData=[];
 
-backBtn.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
-backBtn2.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
-resetBtn.onclick=()=>{location.reload();};
+backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
+backBtn2.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
+resetBtn.addEventListener('click',()=>{location.reload();});
+resetBtn2.addEventListener('click',()=>{location.reload();});
 
-checkBtn.addEventListener('click',async()=>{
+btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  checkBtn.style.display='none';
-  statusEl.style.display='block';
-  await wait(1000);
-  statusEl.style.display='none';
-
-  const map=new Map();
-  ranks.forEach((r,i)=>map.set(norm(r),i+1));
-
+  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  
+  const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({
     text:t,
     rank:map.get(norm(t))||null,
@@ -144,19 +170,13 @@ checkBtn.addEventListener('click',async()=>{
     score:map.get(norm(t))||0
   })).filter(r=>r.text.trim()!=="");
 
+  results.innerHTML='';
   const groupScores=Array(answers.length).fill(0);
 
-  // ✅ เรียง: ไม่พบก่อน → จากนั้นเรียงตามอันดับน้อย→มาก
+  // ✅ เรียงลำดับ: ไม่พบ → อันดับน้อย → มาก
   const notFound=resultData.filter(r=>!r.rank);
   const ranked=resultData.filter(r=>r.rank).sort((a,b)=>a.rank-b.rank);
   resultData=[...notFound,...ranked];
-
-  results.innerHTML='';
-  if(notFound.length && ranked.length){
-    const divider=document.createElement('div');
-    divider.innerHTML=`<hr style="border:1px dashed #ffd400;margin:20px 0;opacity:0.6;">
-      <div style="text-align:center;color:#ffd400;font-weight:600;">✅ คำตอบที่อยู่ใน TOP 25</div>`;
-  }
 
   for(const r of resultData){
     groupScores[r.group-1]+=r.score;
@@ -170,22 +190,47 @@ checkBtn.addEventListener('click',async()=>{
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(300);
+    await wait(400);
     card.classList.add('show');
-    if(r.rank) correctSound.play(); else wrongSound.play();
-    card.scrollIntoView({behavior:"smooth",block:"end"});
+
+    // ✅ เล่นเสียงตามผลลัพธ์
+    if(r.rank){ correctSound.currentTime=0; correctSound.play(); }
+    else { wrongSound.currentTime=0; wrongSound.play(); }
+
+    // ✅ เลื่อนลงอัตโนมัติ
+    card.scrollIntoView({ behavior: "smooth", block: "end" });
   }
 
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0}))
-    .sort((a,b)=>b.score-a.score||a.group-b.group);
-  localStorage.setItem('scoreData',JSON.stringify(scoreData));
-
-  await wait(500);
-  document.getElementById('footerButtons').style.display='flex';
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-b.group);
+  localStorage.setItem('scoreData',JSON.stringify(scoreData)); // เก็บไว้ให้ summary.html ใช้
+  scoreSection.style.display='block';
 });
 
-scoreBtn.onclick=()=>{location.href='score.html';};
+showScoreBtn.addEventListener('click',async()=>{
+  pageTitle.style.opacity='0';
+  topButtons.style.display='none';
+  results.style.display='none';
+  showScoreBtn.style.display='none';
+  footerButtons.style.display='flex';
+
+  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
+  <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>
+  </div>`;
+  
+  const tbody=scoreTable.querySelector('tbody');
+  for(const [idx,row] of scoreData.entries()){
+    const tr=document.createElement('tr');
+    tr.className='table-row';
+    tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
+    tbody.appendChild(tr);
+    await wait(400);
+    tr.classList.add('show');
+    correctSound.currentTime=0;
+    correctSound.play(); // ✅ เล่นเสียง Ding ตอนแต่ละอันดับขึ้น
+  }
+  saveContainer.style.display='flex';
+});
 </script>
 </body>
 </html>
-
