@@ -4,154 +4,434 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TOP 25</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
-:root{--accent:#ffd400;--bg:#05245a;}
-body{
-  margin:0;
-  font-family:"Mitr",sans-serif;
-  background:linear-gradient(180deg,#04214a,#072e5c);
+:root {
+  --accent: #ffd400;
+  --bg: #05245a;
+}
+body {
+  margin: 0;
+  font-family: "Mitr", sans-serif;
+  background: linear-gradient(180deg, #04214a, #072e5c);
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.stage {
+  background: rgba(255,255,255,0.05);
+  padding: 24px;
+  border-radius: 18px;
+  border: 5px solid var(--accent);
+  max-width: 900px;
+  width: 95%;
+}
+
+/* หน้าปกเริ่มเกม */
+#introScreen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #001537;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+  transition: opacity 0.8s ease;
+}
+#introImage {
+  max-width: 80%;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 0 20px rgba(255,255,255,0.2);
+  margin-bottom: 20px;
+}
+#startGameBtn {
+  font-family: "Mitr", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #05245a;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+#startGameBtn:hover {
+  transform: scale(1.05);
+  background: #ffe55e;
+}
+
+h1 {
+  text-align: center;
+  color: var(--accent);
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+textarea, input[type=text] {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(0,0,0,0.2);
+  color: #fff;
+  padding: 10px;
+  font-size: 16px;
+  font-family: "Mitr", sans-serif;
+  box-sizing: border-box;
+}
+textarea { height: 150px; }
+input.duplicate {
+  border: 2px solid #ff6060;
+  background: rgba(255,50,50,0.1);
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px,1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+label { font-size: 15px; color: #ffd400; }
+button {
+  font-family: "Mitr", sans-serif;
+  background: var(--accent);
+  border: 0;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #05245a;
+  transition: transform 0.1s ease;
+}
+button:hover { opacity: 0.9; transform: scale(1.02); }
+.smallButtons { display: flex; gap: 6px; }
+.smallButtons button { font-size: 13px; padding: 6px 10px; border-radius: 6px; }
+#loading, #loadingSet {
+  display: none;
+  text-align: center;
+  font-size: 20px;
+  color: var(--accent);
+  animation: blink 1s infinite;
+  margin-top: 12px;
+}
+@keyframes blink { 0%,100%{opacity:1;}50%{opacity:0.5;} }
+#duplicateMsg {
+  color:#ff6060;font-size:14px;margin-top:10px;
+  display:none;text-align:center;
+}
+#alertMsg {
+  color:#ff6060;
+  font-size:15px;
+  margin-top:15px;
+  display:none;
+  text-align:left;
+  white-space:pre-line;
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.1);
+  padding:10px;
+  border-radius:8px;
+}
+#nextBtn { display:block;margin:30px auto 0; }
+#questionDesc {
+  font-size:42px;margin-bottom:12px;color:#ffd400;text-align:center;
+}
+#footer { text-align:center;color:#ccc;margin-top:20px;font-size:13px; }
+
+/* ตัวจับเวลา */
+.timerBox {
+  border:2px solid var(--accent);
+  border-radius:10px;
+  padding:10px;
+  margin:15px 0;
+  text-align:center;
+  background:rgba(255,255,255,0.05);
+}
+.timerDisplay {
+  font-size:28px;
+  color:var(--accent);
+  font-weight:700;
+}
+.timerLabel {
   color:#fff;
-  display:flex;
+  font-size:18px;
+  margin-bottom:8px;
+}
+#timeUpOverlay {
+  display:none;
+  position:fixed;
+  top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,0.85);
+  color:#ffd400;
+  font-size:60px;
+  font-weight:700;
   justify-content:center;
   align-items:center;
-  min-height:100vh;
-}
-.stage{
-  background:rgba(255,255,255,0.05);
-  padding:24px;
-  border-radius:18px;
-  border:5px solid var(--accent);
-  max-width:900px;
-  width:95%;
-}
-h1{
   text-align:center;
-  color:var(--accent);
-  font-weight:600;
+  z-index:1000;
+  animation: fadeIn 0.3s ease;
 }
-textarea{
-  width:100%;
-  height:150px;
-  border-radius:10px;
-  border:1px solid rgba(255,255,255,0.2);
-  background:rgba(0,0,0,0.2);
-  color:#fff;
-  padding:10px;
-  font-size:16px;
-  font-family:"Mitr",sans-serif;
-}
-input{
-  width:100%;
-  padding:8px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.2);
-  background:rgba(0,0,0,0.2);
-  color:#fff;
-  font-size:16px;
-  font-family:"Mitr",sans-serif;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:12px;
-  margin-top:12px;
-}
-button{
-  font-family:"Mitr",sans-serif;
-  background:var(--accent);
-  border:0;
-  padding:12px 20px;
-  border-radius:12px;
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  color:#05245a;
-  display:block;
-  margin:20px auto 0;
-  transition:transform .1s ease;
-}
-button:hover{opacity:0.9;transform:scale(1.02);}
-.toggle{
-  display:inline-block;
-  margin-top:10px;
-  font-size:14px;
-  color:#cbd5e1;
-  cursor:pointer;
-}
-#answersArea{margin-top:30px;}
-#footer{
-  text-align:center;
-  color:#ccc;
-  margin-top:20px;
-  font-size:13px;
-}
+@keyframes fadeIn { from{opacity:0;}to{opacity:1;} }
 </style>
 </head>
 <body>
+
+<!-- หน้าปกเริ่มเกม -->
+<div id="introScreen">
+  <img src="TOP 25.jpg" alt="TOP 25" id="introImage">
+  <button id="startGameBtn">▶️ เริ่มเกม</button>
+</div>
+
+<div id="timeUpOverlay">⏰ หมดเวลา!</div>
+
 <div class="stage">
-  <h1>🧠 TOP 25 เกมโชว์</h1>
+  <h1>🧠 TOP 25</h1>
+  <div style="text-align:center;margin-bottom:15px;">
+    <button onclick="loadSet(0)">📝 กำหนดเอง</button>
+    <button onclick="loadSet(1)">📦 ชุดที่ 1</button>
+    <button onclick="loadSet(2)">👧 ชุดที่ 2</button>
+    <button onclick="loadSet(3)">🏅 ชุดที่ 3</button>
+    <button onclick="loadSet(4)">🍌 ชุดตัวอย่าง</button>
+  </div>
+
+  <div id="questionDesc"></div>
+  <input id="customQuestion" type="text" placeholder="พิมพ์คำถามของคุณที่นี่..." style="display:none;font-size:20px;margin-bottom:10px;">
+  <div id="loadingSet">⏳ กำลังโหลดข้อมูลชุดคำถาม...</div>
 
   <label>ใส่ข้อมูล 25 อันดับ (ใส่ทีละบรรทัด):</label>
   <textarea id="ranks" placeholder="อันดับที่ 1 ถึง 25..."></textarea>
-  <div class="toggle" id="toggleRanks">🔒 ซ่อนเฉลย</div>
+
+  <div id="toggleRanks" style="display:inline-block;margin-top:10px;border:2px solid var(--accent);padding:5px 10px;border-radius:8px;cursor:pointer;">🔒 ซ่อนเฉลย</div>
+
+  <div class="timerBox">
+    <div class="timerLabel">🕐 ให้เวลาคิดคำตอบ</div>
+    <div class="timerDisplay" id="timerDisplay">30</div>
+    <div style="margin-top:8px;">
+      <button id="startTimerBtn">▶️ เริ่ม</button>
+      <button id="resetTimerBtn">⏹ รีเซ็ตเวลา</button>
+    </div>
+  </div>
 
   <div id="answersArea">
-    <h2 style="color:var(--accent)">คำตอบของกลุ่มต่าง ๆ</h2>
+    <div class="headerRow" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h2 style="color:var(--accent);margin:0;">คำตอบของกลุ่มต่าง ๆ</h2>
+      <div class="smallButtons">
+        <button id="randomOrderBtn">🎲 สุ่มลำดับ</button>
+        <button id="resetOrderBtn">♻️ รีเซ็ต</button>
+      </div>
+    </div>
+
+    <div id="loading">⏳ กำลังโหลดข้อมูล...</div>
     <div class="grid" id="answersGrid"></div>
+    <div id="duplicateMsg">⚠️ พบคำตอบซ้ำ กรุณาแก้ไขให้ไม่ซ้ำกัน</div>
+    <div id="alertMsg"></div>
   </div>
 
   <button id="nextBtn">➡️ ไปหน้าถัดไป (เฉลย)</button>
-  <div id="footer">v1.2 | THP</div>
+  <div id="footer">v3.3 | THP</div>
 </div>
 
 <script>
-const grid=document.getElementById('answersGrid');
-for(let i=1;i<=18;i++){
-  const div=document.createElement('div');
-  div.innerHTML=`<label>กลุ่มที่ ${i}</label><input id="ans${i}" type="text" placeholder="คำตอบของกลุ่ม ${i}">`;
-  grid.appendChild(div);
+/* ---------- Intro Screen ---------- */
+const introScreen=document.getElementById("introScreen");
+const stage=document.querySelector(".stage");
+const startGameBtn=document.getElementById("startGameBtn");
+stage.style.display="none";
+startGameBtn.addEventListener("click",()=>{
+  introScreen.style.opacity="0";
+  setTimeout(()=>{introScreen.style.display="none";stage.style.display="block";},800);
+});
+
+/* ---------- ข้อมูลชุด ---------- */
+const sets=[
+  {question:"",data:""},
+  {question:"25 อันดับสัตว์ที่นิยมเลี้ยงมากที่สุดในไทย",data:`สุนัข\nแมว\nปลาสวยงาม\nกระต่าย\nนก\nเต่า\nหนูแฮมสเตอร์\nชูก้าไกลเดอร์\nเม่นแคระ\nงู\nหนูแกสบี้\nกิ้งก่า\nชินชิล่า\nกุ้ง\nเฟอเรท\nกบ\nแมลง\nม้า\nไก่\nแกะ\nแมงมุม\nหอยทาก\nเป็ด\nลิง\nปู`},
+  {question:"25 อันดับชื่อเล่นผู้หญิงที่โหลที่สุดในไทย",data:`เมย์\nพลอย\nมายด์\nไอซ์\nแนน\nมิ้นท์\nมุก\nเฟิร์น\nออม\nน้ำ\nนิว\nเนย\nแอน\nเกด\nแก้ม\nปลา\nโบว์\nดาว\nอาย\nปุ้ย\nกิ๊ฟ\nฝน\nเอ๋\nอ้อม\nนุ่น`},
+  {question:"25 อันดับกีฬายอดนิยมในประเทศไทย",data:`ฟุตบอล\nวอลเลย์บอล\nแบดมินตัน\nมวยไทย\nบาสเกตบอล\nว่ายน้ำ\nจักรยาน\nเทนนิส\nอีสปอร์ต\nปิงปอง\nกรีฑา\nวิ่ง\nตะกร้อ\nกอล์ฟ\nฟุตซอล\nยกน้ำหนัก\nยิมนาสติก\nโบว์ลิ่ง\nสนุกเกอร์\nเทควันโด\nแข่งรถ\nยิงปืน\nเปตอง\nคาราเต้\nเรือใบ`},
+  {question:"25 อันดับผลไม้ยอดนิยมในประเทศไทย",data:`กล้วย\nแอปเปิล\nส้ม\nแตงโม\nองุ่น\nมะม่วง\nสตรอว์เบอร์รี\nสับปะรด\nมะละกอ\nกีวี\nเชอร์รี\nมะพร้าว\nแคนตาลูป\nเงาะ\nมังคุด\nลูกแพร์\nฝรั่ง\nบลูเบอร์รี\nเสาวรส\nทับทิม\nลูกพีช\nอะโวคาโด\nพลับ\nทุเรียน\nลำไย`}
+];
+
+/* ---------- ส่วนควบคุม ---------- */
+const grid=document.getElementById("answersGrid");
+const ranksArea=document.getElementById("ranks");
+const toggleRanks=document.getElementById("toggleRanks");
+const questionDesc=document.getElementById("questionDesc");
+const customQuestion=document.getElementById("customQuestion");
+const duplicateMsg=document.getElementById("duplicateMsg");
+const alertMsg=document.getElementById("alertMsg");
+const loadingSet=document.getElementById("loadingSet");
+let hidden=false;
+
+function loadSet(i){
+  questionDesc.style.display="none";
+  ranksArea.style.display="none";
+  customQuestion.style.display="none";
+  loadingSet.style.display="block";
+  setTimeout(()=>{
+    loadingSet.style.display="none";
+    const set=sets[i];
+    if(i===0){
+      customQuestion.style.display="block";
+      ranksArea.value="";
+      ranksArea.style.display="block";
+      hidden=false;
+    }else{
+      customQuestion.style.display="none";
+      questionDesc.textContent=set.question;
+      questionDesc.style.display="block";
+      ranksArea.value=set.data;
+      ranksArea.style.display="none";
+      hidden=true;
+    }
+    updateToggleText();
+  },800);
+}
+function updateToggleText(){
+  toggleRanks.textContent=hidden?"🔓 แสดงเฉลย":"🔒 ซ่อนเฉลย";
+}
+toggleRanks.addEventListener("click",()=>{hidden=!hidden;ranksArea.style.display=hidden?"none":"block";updateToggleText();});
+
+function simulateLoading(callback){
+  grid.style.opacity="0";grid.style.pointerEvents="none";
+  document.getElementById("loading").style.display="block";
+  setTimeout(()=>{
+    document.getElementById("loading").style.display="none";
+    callback();
+    grid.style.opacity="1";grid.style.pointerEvents="auto";
+  },1000);
+}
+document.getElementById("randomOrderBtn").addEventListener("click",()=>simulateLoading(shuffleGroups));
+document.getElementById("resetOrderBtn").addEventListener("click",()=>simulateLoading(resetGroups));
+function resetGroups(){
+  grid.innerHTML="";
+  for(let i=1;i<=18;i++){
+    const div=document.createElement("div");
+    div.innerHTML=`<label>กลุ่มที่ ${i}</label><input id="ans${i}" type="text" placeholder="คำตอบของกลุ่ม ${i}">`;
+    grid.appendChild(div);
+  }
+  attachDuplicateCheck();
+}
+function shuffleGroups(){
+  const items=[...grid.children];
+  for(let i=items.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    grid.appendChild(items[j]);
+  }
+}
+function attachDuplicateCheck(){
+  const inputs=grid.querySelectorAll("input");
+  inputs.forEach(inp=>{
+    inp.addEventListener("input",()=>{
+      const values=[...inputs].map(i=>i.value.trim().toLowerCase()).filter(Boolean);
+      const dup=values.filter((v,i,a)=>a.indexOf(v)!==i);
+      let any=false;
+      inputs.forEach(i=>{
+        if(dup.includes(i.value.trim().toLowerCase())){i.classList.add("duplicate");any=true;}
+        else i.classList.remove("duplicate");
+      });
+      duplicateMsg.style.display=any?"block":"none";
+    });
+  });
 }
 
-// 🔒 ซ่อน/แสดงเฉลย
-const ranksArea=document.getElementById('ranks');
-const toggleRanks=document.getElementById('toggleRanks');
-let hidden=false;
-toggleRanks.addEventListener('click',()=>{
-  hidden=!hidden;
-  ranksArea.style.display=hidden?'none':'block';
-  toggleRanks.textContent=hidden?'🔓 แสดงเฉลย':'🔒 ซ่อนเฉลย';
-});
+/* ---------- ตัวจับเวลา ---------- */
+const timerDisplay=document.getElementById("timerDisplay");
+const startBtn=document.getElementById("startTimerBtn");
+const resetBtn=document.getElementById("resetTimerBtn");
+const overlay=document.getElementById("timeUpOverlay");
+let timer=null,timeLeft=30;
 
-// ▶️ ปุ่มไปหน้าถัดไป
-document.getElementById('nextBtn').addEventListener('click',()=>{
-  const ranks=document.getElementById('ranks').value.trim();
+function playBeep(){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.type="sine";osc.frequency.value=880;
+  gain.gain.setValueAtTime(0.2,ctx.currentTime);
+  osc.start();osc.stop(ctx.currentTime+0.2);
+}
+function playAlarm(){
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.type="square";
+  gain.gain.setValueAtTime(0.2,ctx.currentTime);
+  for(let i=0;i<6;i++){
+    osc.frequency.setValueAtTime(i%2?440:660,ctx.currentTime+i*0.25);
+  }
+  osc.start();osc.stop(ctx.currentTime+3);
+}
+function showTimeUp(){
+  overlay.style.display="flex";
+  playAlarm();
+  setTimeout(()=>overlay.style.display="none",3000);
+}
+function startTimer(){
+  clearInterval(timer);
+  overlay.style.display="none";
+  timeLeft=30;
+  timerDisplay.textContent=timeLeft;
+  timer=setInterval(()=>{
+    timeLeft--;
+    timerDisplay.textContent=timeLeft;
+    if(timeLeft<=5 && timeLeft>0) playBeep();
+    if(timeLeft<=0){
+      clearInterval(timer);
+      timerDisplay.textContent="หมดเวลา!";
+      showTimeUp();
+    }
+  },1000);
+}
+function resetTimer(){
+  clearInterval(timer);
+  overlay.style.display="none";
+  timeLeft=30;
+  timerDisplay.textContent=timeLeft;
+}
+startBtn.addEventListener("click",startTimer);
+resetBtn.addEventListener("click",resetTimer);
+
+/* ---------- ปุ่มไปหน้าเฉลย ---------- */
+document.getElementById("nextBtn").addEventListener("click",()=>{
+  alertMsg.style.display="none";
+  alertMsg.textContent="";
+
   const answers=[];
   for(let i=1;i<=18;i++){
-    answers.push(document.getElementById('ans'+i).value.trim());
+    const val=document.getElementById(`ans${i}`).value.trim();
+    if(val) answers.push(val); // ✅ นับเฉพาะช่องที่กรอก
   }
 
-  if(!ranks){alert('กรุณาใส่ข้อมูล 25 อันดับ');return;}
+  const question=customQuestion.value.trim()||questionDesc.textContent.trim();
+  const ranks=ranksArea.value.trim();
+  const errors=[];
+  if(answers.length === 0)
+    errors.push("⚠️ ต้องใส่อย่างน้อย 1 กลุ่มคำตอบ");
+  if(!question) errors.push("⚠️ ยังไม่ได้ใส่คำถาม");
+  if(!ranks) errors.push("⚠️ ยังไม่ได้ใส่ข้อมูล 25 อันดับ");
 
-  // ✅ เก็บข้อมูลไว้ใน localStorage
-  localStorage.setItem('ranks',ranks);
-  localStorage.setItem('answers',JSON.stringify(answers));
+  const lower=answers.map(v=>v.toLowerCase());
+  const dup=lower.filter((v,i,a)=>a.indexOf(v)!==i);
+  if(dup.length>0) errors.push(`⚠️ พบคำตอบซ้ำ: ${[...new Set(dup)].join(", ")}`);
 
-  // ✅ ตรวจว่ามี result.html หรือไม่
-  fetch('result.html',{method:'HEAD'})
-    .then(res=>{
-      if(res.ok){
-        location.href='result.html';
-      }else{
-        alert('⚠️ ไม่พบไฟล์ result.html ในโฟลเดอร์เดียวกัน');
-      }
-    })
-    .catch(()=>{
-      alert('⚠️ ไม่พบไฟล์ result.html (ตรวจสอบชื่อไฟล์ให้ถูกต้อง)');
-    });
+  if(errors.length>0){
+    alertMsg.style.display="block";
+    alertMsg.textContent=errors.join("\n");
+    return;
+  }
+
+  localStorage.setItem("answers",JSON.stringify(answers));
+  localStorage.setItem("question",question);
+  localStorage.setItem("ranks",ranks);
+  window.location.href="result.html";
 });
+
+/* ---------- เริ่มต้น ---------- */
+resetGroups();
 </script>
 </body>
 </html>
