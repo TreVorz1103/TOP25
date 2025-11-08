@@ -94,11 +94,6 @@ button:hover{transform:scale(1.05);}
   <div id="status" style="display:none;margin-top:20px;">⏳ กำลังตรวจคำตอบ...</div>
   <div id="results"></div>
 
-  <div id="footerButtons">
-    <button id="scoreBtn">🏆 ดูสรุปคะแนน</button>
-    <button id="backBtn2">⬅️ กลับหน้าแรก</button>
-  </div>
-
   <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="Wrong.mp3" preload="auto"></audio>
 </div>
@@ -116,15 +111,10 @@ const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
 const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
-const backBtn2=document.getElementById('backBtn2');
-const scoreBtn=document.getElementById('scoreBtn');
 const correctSound=document.getElementById('correctSound');
 const wrongSound=document.getElementById('wrongSound');
 
-let scoreData=[];
-
 backBtn.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
-backBtn2.onclick=()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูล?')){localStorage.clear();location.href='index.html';}};
 resetBtn.onclick=()=>{location.reload();};
 
 checkBtn.addEventListener('click',async()=>{
@@ -140,11 +130,8 @@ checkBtn.addEventListener('click',async()=>{
   let resultData=answers.map((t,i)=>({
     text:t,
     rank:map.get(norm(t))||null,
-    group:i+1,
-    score:map.get(norm(t))||0
+    group:i+1
   })).filter(r=>r.text.trim()!=="");
-
-  const groupScores=Array(answers.length).fill(0);
 
   // ✅ เรียง: ไม่พบก่อน → จากนั้นเรียงตามอันดับน้อย→มาก
   const notFound=resultData.filter(r=>!r.rank);
@@ -160,7 +147,6 @@ checkBtn.addEventListener('click',async()=>{
   }
 
   for(const r of resultData){
-    groupScores[r.group-1]+=r.score;
     const card=document.createElement('div');
     card.className='card-result';
     card.innerHTML=`
@@ -186,16 +172,7 @@ checkBtn.addEventListener('click',async()=>{
 
     card.scrollIntoView({behavior:"smooth",block:"end"});
   }
-
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0}))
-    .sort((a,b)=>b.score-a.score||a.group-b.group);
-  localStorage.setItem('scoreData',JSON.stringify(scoreData));
-
-  await wait(500);
-  document.getElementById('footerButtons').style.display='flex';
 });
-
-scoreBtn.onclick=()=>{location.href='score.html';};
 </script>
 </body>
 </html>
