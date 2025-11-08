@@ -188,6 +188,8 @@ select {
 
 <!-- เสียงเอฟเฟกต์ -->
 <audio id="ding" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c0b4ac7780.mp3?filename=notification-2-144459.mp3"></audio>
+<audio id="pop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0c2b0dcb2b.mp3?filename=pop-94319.mp3"></audio>
+<audio id="cheer" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_b28b799c1f.mp3?filename=success-1-6297.mp3"></audio>
 
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
@@ -198,6 +200,8 @@ const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).fil
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
 const ding=document.getElementById('ding');
+const pop=document.getElementById('pop');
+const cheer=document.getElementById('cheer');
 const btn=document.getElementById('checkBtn');
 const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
@@ -238,8 +242,7 @@ btn.addEventListener('click',async()=>{
     results.appendChild(card);
     await wait(750);
     card.classList.add('show');
-    ding.currentTime = 0;
-    ding.play();
+    if(r.rank) ding.play(); else pop.play();
   }
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
@@ -259,8 +262,7 @@ showScoreBtn.addEventListener('click',async()=>{
     tbody.appendChild(tr);
     await wait(750);
     tr.classList.add('show');
-    ding.currentTime=0;
-    ding.play();
+    if(idx===0) cheer.play(); else ding.play();
   }
   saveContainer.style.display='block';
 });
