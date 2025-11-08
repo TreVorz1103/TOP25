@@ -92,11 +92,6 @@ th{background:var(--highlight);color:#05245a;}
   </div>
 </div>
 
-<!-- เสียงเอฟเฟกต์ (คุณสามารถใส่ src เองทีหลังได้) -->
-<audio id="ding"></audio>
-<audio id="pop"></audio>
-<audio id="cheer"></audio>
-
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 function norm(s){return (s||'').toLowerCase().trim();}
@@ -105,9 +100,6 @@ function escapeHtml(s){return (s||'').replace(/[&<>]/g,m=>({"&":"&amp;","<":"&lt
 const ranks=(localStorage.getItem('ranks')||'').split('\n').map(v=>v.trim()).filter(Boolean);
 const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
-const ding=document.getElementById('ding');
-const pop=document.getElementById('pop');
-const cheer=document.getElementById('cheer');
 const btn=document.getElementById('checkBtn');
 const statusEl=document.getElementById('status');
 const results=document.getElementById('results');
@@ -152,7 +144,6 @@ btn.addEventListener('click',async()=>{
     results.appendChild(card);
     await wait(500);
     card.classList.add('show');
-    if(r.rank) ding.play(); else pop.play();
   }
 
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s})).filter(g=>g.score>0).sort((a,b)=>b.score-a.score||a.group-b.group);
@@ -172,7 +163,6 @@ showScoreBtn.addEventListener('click',async()=>{
     tbody.appendChild(tr);
     await wait(500);
     tr.classList.add('show');
-    if(idx===0) cheer.play(); else ding.play();
   }
   saveContainer.style.display='flex';
 });
