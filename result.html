@@ -99,8 +99,10 @@ button:hover{transform:scale(1.05);}
     <button id="backBtn2">⬅️ กลับหน้าแรก</button>
   </div>
 
+  <!-- 🔊 เสียง -->
   <audio id="correctSound" src="Ding.mp3" preload="auto"></audio>
   <audio id="wrongSound" src="Wrong.mp3" preload="auto"></audio>
+  <audio id="finishSound" src="Finish.mp3" preload="auto"></audio>
 </div>
 
 <script>
@@ -120,6 +122,7 @@ const backBtn2=document.getElementById('backBtn2');
 const scoreBtn=document.getElementById('scoreBtn');
 const correctSound=document.getElementById('correctSound');
 const wrongSound=document.getElementById('wrongSound');
+const finishSound=document.getElementById('finishSound');
 
 let scoreData=[];
 
@@ -152,11 +155,6 @@ checkBtn.addEventListener('click',async()=>{
   resultData=[...notFound,...ranked];
 
   results.innerHTML='';
-  if(notFound.length && ranked.length){
-    const divider=document.createElement('div');
-    divider.innerHTML=`<hr style="border:1px dashed #ffd400;margin:20px 0;opacity:0.6;">
-      <div style="text-align:center;color:#ffd400;font-weight:600;">✅ คำตอบที่อยู่ใน TOP 25</div>`;
-  }
 
   for(const r of resultData){
     groupScores[r.group-1]+=r.score;
@@ -172,10 +170,24 @@ checkBtn.addEventListener('click',async()=>{
     results.appendChild(card);
     await wait(300);
     card.classList.add('show');
-    if(r.rank) correctSound.play(); else wrongSound.play();
+
+    // 🔊 เล่นเสียงทุกครั้งที่การ์ดเด้ง
+    if(r.rank){
+      correctSound.currentTime = 0;
+      correctSound.play();
+    } else {
+      wrongSound.currentTime = 0;
+      wrongSound.play();
+    }
+
     card.scrollIntoView({behavior:"smooth",block:"end"});
   }
 
+  // ✅ หลังจากเฉลยครบทั้งหมด เล่นเสียง Finish
+  finishSound.currentTime = 0;
+  finishSound.play();
+
+  // ✅ เก็บคะแนนไว้สำหรับหน้า score.html
   scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0}))
     .sort((a,b)=>b.score-a.score||a.group-b.group);
   localStorage.setItem('scoreData',JSON.stringify(scoreData));
@@ -188,4 +200,3 @@ scoreBtn.onclick=()=>{location.href='score.html';};
 </script>
 </body>
 </html>
-
