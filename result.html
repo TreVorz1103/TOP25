@@ -92,6 +92,10 @@ th{background:var(--highlight);color:#05245a;}
   </div>
 </div>
 
+<!-- 🔊 preload เสียง -->
+<audio id="soundCorrect" src="Ding.mp3" preload="auto"></audio>
+<audio id="soundWrong" src="Worng.mp3" preload="auto"></audio>
+
 <script>
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 function norm(s){return (s||'').toLowerCase().trim();}
@@ -110,6 +114,8 @@ const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
 const scoreSection=document.getElementById('scoreSection');
 const showScoreBtn=document.getElementById('showScoreBtn');
+const soundCorrect=document.getElementById('soundCorrect');
+const soundWrong=document.getElementById('soundWrong');
 
 let scoreData=[];
 
@@ -144,9 +150,17 @@ btn.addEventListener('click',async()=>{
     results.appendChild(card);
     await wait(500);
     card.classList.add('show');
+
+    // 🔊 เล่นเสียงอัตโนมัติ
+    if(r.rank){
+      soundCorrect.currentTime=0;
+      soundCorrect.play().catch(()=>{});
+    }else{
+      soundWrong.currentTime=0;
+      soundWrong.play().catch(()=>{});
+    }
   }
 
-  // ✅ แก้ส่วนนี้เพื่อให้ทุกกลุ่มแสดงคะแนน (แม้จะเป็น 0)
   scoreData = groupScores.map((s, i) => ({
     group: i + 1,
     score: s || 0
