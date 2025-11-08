@@ -27,6 +27,12 @@ body{
 table{
   width:100%;border-collapse:collapse;background:#fff;color:#05245a;
   border-radius:12px;overflow:hidden;font-size:18px;margin-top:20px;
+  opacity:0;transform:translateY(20px);
+  transition:opacity 0.8s ease, transform 0.8s ease;
+}
+table.show{
+  opacity:1;
+  transform:translateY(0);
 }
 th,td{border:1px solid #ccc;padding:10px;}
 th{background:var(--highlight);color:#05245a;}
@@ -36,6 +42,11 @@ tr.bronze td{background:#ffd9b3;font-weight:700;}
 button{
   background:var(--highlight);color:#05245a;border:none;border-radius:10px;
   padding:10px 20px;font-size:18px;font-weight:700;cursor:pointer;margin:10px;
+  opacity:0;transform:translateY(10px);
+  transition:opacity 0.6s ease, transform 0.6s ease;
+}
+button.show{
+  opacity:1;transform:translateY(0);
 }
 </style>
 </head>
@@ -43,12 +54,12 @@ button{
 <div class="container">
   <h1>🏆 สรุปผลคะแนน 🏆</h1>
   <div id="loading">⏳ กำลังโหลดข้อมูล...</div>
-  <table id="scoreTable" style="display:none;">
+  <table id="scoreTable">
     <thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead>
     <tbody id="tbody"></tbody>
   </table>
-  <button id="backBtn" style="display:none;">⬅️ กลับหน้าแรก</button>
-  <button id="revealBtn" style="display:none;">📋 กลับไปดูเฉลย</button>
+  <button id="backBtn">⬅️ กลับหน้าแรก</button>
+  <button id="revealBtn">📋 กลับไปดูเฉลย</button>
 </div>
 
 <script>
@@ -61,33 +72,46 @@ const revealBtn=document.getElementById('revealBtn');
 function wait(ms){return new Promise(res=>setTimeout(res,ms));}
 
 async function loadScores(){
-  await wait(1500); // แสดง "กำลังโหลด" 1.5 วินาที
+  // ซ่อนทุกอย่างก่อน
+  scoreTable.classList.remove('show');
+  backBtn.classList.remove('show');
+  revealBtn.classList.remove('show');
+  scoreTable.style.display='none';
+  backBtn.style.display='none';
+  revealBtn.style.display='none';
+
+  await wait(1500); // รอโหลด 1.5 วินาที
   const scoreData=JSON.parse(localStorage.getItem('scoreData')||'[]');
 
   loading.style.display='none';
   scoreTable.style.display='table';
-  backBtn.style.display='inline-block';
-  revealBtn.style.display='inline-block';
 
   if(!scoreData.length){
     tbody.innerHTML='<tr><td colspan="3">❌ ไม่มีข้อมูลคะแนน</td></tr>';
-    return;
+  } else {
+    tbody.innerHTML='';
+    scoreData.forEach((r,i)=>{
+      const tr=document.createElement('tr');
+      let rankIcon='',rankClass='';
+      if(i===0){rankIcon='🥇';rankClass='gold';}
+      else if(i===1){rankIcon='🥈';rankClass='silver';}
+      else if(i===2){rankIcon='🥉';rankClass='bronze';}
+      else{rankIcon=i+1;}
+      tr.className=rankClass;
+      tr.innerHTML=`<td>${rankIcon}</td><td>${r.group}</td><td>${r.score}</td>`;
+      tbody.appendChild(tr);
+    });
   }
 
-  scoreData.forEach((r,i)=>{
-    const tr=document.createElement('tr');
-    let rankIcon='';
-    let rankClass='';
-
-    if(i===0){rankIcon='🥇';rankClass='gold';}
-    else if(i===1){rankIcon='🥈';rankClass='silver';}
-    else if(i===2){rankIcon='🥉';rankClass='bronze';}
-    else{rankIcon=i+1;}
-
-    tr.className=rankClass;
-    tr.innerHTML=`<td>${rankIcon}</td><td>${r.group}</td><td>${r.score}</td>`;
-    tbody.appendChild(tr);
-  });
+  // เพิ่มเอฟเฟกต์ fade-in
+  await wait(100);
+  scoreTable.classList.add('show');
+  backBtn.style.display='inline-block';
+  revealBtn.style.display='inline-block';
+  await wait(200);
+  backBtn.classList.add('show');
+  await wait(200);
+  revealBtn.classList.add('show');
 }
 
 loadScores();
