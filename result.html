@@ -25,8 +25,16 @@ body{
   border:5px solid var(--highlight);border-radius:20px;
   box-shadow:0 0 30px rgba(255,255,255,0.3);
   display:flex;flex-direction:column;align-items:center;padding:20px 30px;overflow-y:auto;
+  position:relative;
 }
-h1{color:var(--highlight);text-shadow:2px 2px 0 #000;font-size:2.5em;text-align:center;margin-bottom:20px;}
+h1{
+  color:var(--highlight);
+  text-shadow:2px 2px 0 #000;
+  font-size:2.5em;
+  text-align:center;
+  margin-bottom:20px;
+  transition:opacity 0.5s ease;
+}
 button{
   background:var(--highlight);color:#05245a;border:none;border-radius:10px;
   padding:12px 22px;font-size:18px;font-weight:700;cursor:pointer;margin:8px;
@@ -42,6 +50,7 @@ button:hover{transform:scale(1.05);}
   margin: 10px 0 20px 0;
   width: 100%;
   text-align: center;
+  transition:all 0.4s ease;
 }
 .card-result{
   background:rgba(255,255,255,0.1);border:2px solid var(--highlight);
@@ -68,13 +77,20 @@ th{background:var(--highlight);color:#05245a;}
 .table-row{opacity:0;transform:translateY(20px);transition:opacity 0.4s ease,transform 0.4s ease;}
 .table-row.show{opacity:1;transform:translateY(0);}
 #saveContainer{display:none;margin-top:25px;flex-direction:column;align-items:center;}
+#footerButtons {
+  display: none;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 20px;
+}
 </style>
 </head>
 <body>
 <div class="container">
   <h1 id="pageTitle">🎯 เฉลยคำตอบแต่ละกลุ่ม 🎯</h1>
 
-  <div class="button-group">
+  <div class="button-group" id="topButtons">
     <button id="backBtn">⬅️ กลับหน้าแรก</button>
     <button id="resetBtn">🔄 รีเซ็ต</button>
     <button id="checkBtn">📋 แสดงเฉลยคำตอบ</button>
@@ -88,6 +104,10 @@ th{background:var(--highlight);color:#05245a;}
     <div id="scoreTable"></div>
     <div id="saveContainer">
       <button id="saveBtn">💾 บันทึกเป็นไฟล์ TXT</button>
+    </div>
+    <div id="footerButtons">
+      <button id="backBtnBottom">⬅️ กลับหน้าแรก</button>
+      <button id="resetBtnBottom">🔄 รีเซ็ต</button>
     </div>
   </div>
 </div>
@@ -114,13 +134,38 @@ const backBtn=document.getElementById('backBtn');
 const resetBtn=document.getElementById('resetBtn');
 const scoreSection=document.getElementById('scoreSection');
 const showScoreBtn=document.getElementById('showScoreBtn');
+const pageTitle=document.getElementById('pageTitle');
+const topButtons=document.getElementById('topButtons');
+const footerButtons=document.getElementById('footerButtons');
 const soundCorrect=document.getElementById('soundCorrect');
 const soundWrong=document.getElementById('soundWrong');
+const backBtnBottom=document.getElementById('backBtnBottom');
+const resetBtnBottom=document.getElementById('resetBtnBottom');
 
 let scoreData=[];
 
-backBtn.addEventListener('click',()=>{if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}});
-resetBtn.addEventListener('click',()=>{results.innerHTML='';scoreTable.innerHTML='';saveContainer.style.display='none';btn.style.display='block';scoreSection.style.display='none';});
+function goHome(){
+  if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){
+    localStorage.clear();
+    location.href='index.html';
+  }
+}
+function resetPage(){
+  results.innerHTML='';
+  scoreTable.innerHTML='';
+  saveContainer.style.display='none';
+  btn.style.display='block';
+  scoreSection.style.display='none';
+  pageTitle.style.opacity='1';
+  topButtons.style.display='flex';
+  footerButtons.style.display='none';
+  results.style.display='block';
+}
+
+backBtn.addEventListener('click',goHome);
+backBtnBottom.addEventListener('click',goHome);
+resetBtn.addEventListener('click',resetPage);
+resetBtnBottom.addEventListener('click',resetPage);
 
 btn.addEventListener('click',async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
@@ -150,15 +195,8 @@ btn.addEventListener('click',async()=>{
     results.appendChild(card);
     await wait(500);
     card.classList.add('show');
-
-    // 🔊 เล่นเสียงอัตโนมัติ
-    if(r.rank){
-      soundCorrect.currentTime=0;
-      soundCorrect.play().catch(()=>{});
-    }else{
-      soundWrong.currentTime=0;
-      soundWrong.play().catch(()=>{});
-    }
+    if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
+    else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
   }
 
   scoreData = groupScores.map((s, i) => ({
@@ -170,6 +208,10 @@ btn.addEventListener('click',async()=>{
 });
 
 showScoreBtn.addEventListener('click',async()=>{
+  // ซ่อนหัวข้อและปุ่มบน
+  pageTitle.style.opacity='0';
+  topButtons.style.display='none';
+
   results.style.display='none';
   showScoreBtn.style.display='none';
   scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
@@ -184,6 +226,7 @@ showScoreBtn.addEventListener('click',async()=>{
     tr.classList.add('show');
   }
   saveContainer.style.display='flex';
+  footerButtons.style.display='flex'; // แสดงปุ่มด้านล่างหลังตาราง
 });
 
 saveBtn.addEventListener('click', () => {
