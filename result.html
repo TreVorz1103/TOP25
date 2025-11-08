@@ -217,6 +217,35 @@ btn.addEventListener('click',async()=>{
   scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>${tableHTML}`;
   saveContainer.style.display='block';
 });
+
+// ✅ ส่วนใหม่: ส่งข้อมูลไป Google Sheet
+const scriptURL = "https://script.google.com/macros/s/PASTE_YOUR_SCRIPT_URL_HERE/exec"; // แก้ตรงนี้เป็น URL ของ Web App คุณ
+
+saveBtn.addEventListener('click', () => {
+  const game = gameSelect.value;
+  if (!game) return alert("⚠️ กรุณาเลือกเกมก่อนบันทึก");
+
+  const tableRows = scoreTable.querySelectorAll("tbody tr");
+  if (!tableRows.length) return alert("⚠️ ยังไม่มีข้อมูลคะแนน");
+
+  const scores = Array.from(tableRows).map(row => ({
+    group: row.children[1].innerText.trim(),
+    score: parseFloat(row.children[2].innerText.trim())
+  }));
+
+  const payload = { game, scores };
+
+  fetch(scriptURL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+  .then(() => alert("✅ บันทึกข้อมูลสำเร็จ!"))
+  .catch(err => {
+    console.error(err);
+    alert("❌ เกิดข้อผิดพลาดในการบันทึก");
+  });
+});
 </script>
 </body>
 </html>
