@@ -74,19 +74,6 @@ button:hover { transform: scale(1.05); }
   color: #fff !important;
 }
 #results, #scoreTable { width: 100%; text-align: center; margin-top: 20px; }
-table {
-  width: 90%; margin: 15px auto;
-  border-collapse: collapse;
-  background: #ffffff; color: #05245a;
-  border-radius: 12px; overflow: hidden;
-}
-th, td { border: 1px solid #ccc; padding: 10px 12px; font-size: 18px; }
-th { background: var(--highlight); color: #05245a; }
-.table-row {
-  opacity: 0; transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.table-row.show { opacity: 1; transform: translateY(0); }
 #saveContainer { display: none; margin-top: 25px; flex-direction: column; align-items: center; }
 #footerButtons {
   display: none; justify-content: center; align-items: center;
@@ -134,6 +121,60 @@ th { background: var(--highlight); color: #05245a; }
 #closeLeaderboard {
   background: #fff; color: #05245a;
   margin-top: 15px;
+}
+
+/* 🟦 กล่องสรุปคะแนนแบบการ์ด */
+.score-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 3px solid var(--highlight);
+  border-radius: 20px;
+  padding: 25px;
+  margin: 20px auto;
+  width: 90%;
+  max-width: 900px;
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+  text-align: center;
+  color: var(--text);
+  animation: scorePop 0.5s ease;
+}
+@keyframes scorePop {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.score-card h2 {
+  color: var(--highlight);
+  text-shadow: 2px 2px 0 #000;
+  font-size: 2em;
+  margin-bottom: 20px;
+}
+table {
+  width: 90%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border: 2px solid var(--highlight);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0 15px rgba(255,255,255,0.2);
+}
+th, td {
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 14px 18px;
+  font-size: 20px;
+  text-align: center;
+}
+th {
+  background: var(--highlight);
+  color: #05245a;
+  font-weight: 700;
+}
+tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.08);
+}
+tr:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transition: background 0.3s ease;
 }
 </style>
 </head>
@@ -258,35 +299,43 @@ showScoreBtn.onclick=async()=>{
   results.style.display='none';
   showScoreBtn.style.display='none';
 
-  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`;
-  const tbody=scoreTable.querySelector('tbody');
+  // 🏆 แสดงกล่องสรุปผลคะแนนแบบการ์ด
+  scoreTable.innerHTML = `
+    <div class="score-card">
+      <h2>🏆 สรุปผลคะแนน 🏆</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>อันดับ</th>
+            <th>กลุ่ม</th>
+            <th>คะแนน</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${scoreData.map((r, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td>กลุ่ม ${r.group}</td>
+              <td>${r.score}</td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
 
-  for(const [idx,row] of scoreData.entries()){
-    const tr=document.createElement('tr');
-    tr.className='table-row';
-    tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
-    tbody.appendChild(tr);
-    await wait(400);
-    tr.classList.add('show');
-    soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
-    tr.scrollIntoView({behavior:"smooth",block:"center"});
-  }
-
+  soundCorrect.play().catch(()=>{});
   saveContainer.style.display='flex';
   footerButtons.style.display='flex';
 
-  await wait(800);
-  // 🏆 แสดง Leaderboard Popup
-  leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
+  await wait(500);
+  leaderboardList.innerHTML = scoreData.slice(0,5).map((r,i)=>
     `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
   leaderboardPopup.style.display='flex';
   soundCorrect.play().catch(()=>{});
 };
 
-closeLeaderboard.onclick=()=>{
-  leaderboardPopup.style.display='none';
-};
+closeLeaderboard.onclick=()=>{ leaderboardPopup.style.display='none'; };
 </script>
 </body>
 </html>
