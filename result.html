@@ -27,16 +27,17 @@ body {
 
 .container {
   width: 90vw;
-  height: 90vh;
+  min-height: 90vh;
   background: rgba(255, 255, 255, 0.08);
   border: 5px solid var(--highlight);
   border-radius: 20px;
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   align-items: center;
   padding: 20px 30px;
-  overflow-y: auto; /* ✅ เลื่อนในกรอบได้ */
+  overflow-y: auto;
   position: relative;
 }
 
@@ -105,29 +106,16 @@ button:hover { transform: scale(1.05); }
   color: #fff !important;
 }
 
-#results, #scoreTable {
-  width: 100%;
-  text-align: center;
+#scoreCards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   margin-top: 20px;
 }
-
-table {
-  width: 95%; /* ✅ ขยายตารางนิดหน่อย */
-  margin: 15px auto;
-  border-collapse: collapse;
-  background: #ffffff;
-  color: #05245a;
-  border-radius: 12px;
-  overflow: hidden;
+#scoreCards .card-result {
+  opacity: 1 !important;
+  transform: none !important;
 }
-th, td { border: 1px solid #ccc; padding: 12px 14px; font-size: 18px; }
-th { background: var(--highlight); color: #05245a; }
-
-.table-row {
-  opacity: 0; transform: translateY(20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-.table-row.show { opacity: 1; transform: translateY(0); }
 
 #saveContainer {
   display: none;
@@ -241,10 +229,7 @@ const answers=JSON.parse(localStorage.getItem('answers')||'[]');
 
 const soundCorrect=document.getElementById('soundCorrect');
 const soundWrong=document.getElementById('soundWrong');
-document.body.addEventListener('click',()=>{
-  soundCorrect.play().catch(()=>{});soundCorrect.pause();
-  soundWrong.play().catch(()=>{});soundWrong.pause();
-},{once:true});
+document.body.addEventListener('click',()=>{soundCorrect.play().catch(()=>{});soundCorrect.pause();soundWrong.play().catch(()=>{});soundWrong.pause();},{once:true});
 
 const btn=document.getElementById('checkBtn');
 const results=document.getElementById('results');
@@ -262,8 +247,8 @@ const closeLeaderboard=document.getElementById('closeLeaderboard');
 
 let scoreData=[];
 
-function goHome(){ if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){ localStorage.clear(); location.href='index.html'; } }
-function resetPage(){ location.reload(); }
+function goHome(){if(confirm('กลับไปหน้าแรกและล้างข้อมูลที่กรอกไว้หรือไม่?')){localStorage.clear();location.href='index.html';}}
+function resetPage(){location.reload();}
 
 document.getElementById('backBtn').onclick=goHome;
 document.getElementById('backBtnBottom').onclick=goHome;
@@ -272,8 +257,7 @@ document.getElementById('resetBtnBottom').onclick=resetPage;
 
 btn.onclick=async()=>{
   if(!ranks.length||!answers.length){alert('ไม่มีข้อมูล กรุณากลับไปหน้าแรก');return;}
-  topButtons.style.display='none'; // ✅ ซ่อนปุ่มทั้งหมดชั่วคราว
-  statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
+  btn.style.display='none';statusEl.style.display='block';await wait(1000);statusEl.style.display='none';
   
   const map=new Map();ranks.forEach((r,i)=>map.set(norm(r),i+1));
   let resultData=answers.map((t,i)=>({text:t,rank:map.get(norm(t))||null,group:i+1,score:map.get(norm(t))||0})).filter(r=>r.text.trim()!=="");
@@ -291,57 +275,66 @@ btn.onclick=async()=>{
     card.innerHTML=`
       <div>
         <div style="font-size:18px;font-weight:600">${escapeHtml(r.text)}</div>
-        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติด 25 อันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
+        <div style="font-size:14px;color:#ddd">กลุ่ม ${r.group} — ${r.rank ? 'ติดอันดับ' : '<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}</div>
       </div>
       ${r.rank ? `<div class="rank-badge">ที่ ${r.rank}</div>` : `<div class="rank-badge notfound">ไม่พบ</div>`}
     `;
     results.appendChild(card);
-    await wait(700); // ✅ หน่วงเวลา 0.7 วิ
+    await wait(700);
     card.classList.add('show');
     if(r.rank){soundCorrect.currentTime=0;soundCorrect.play().catch(()=>{});}
     else{soundWrong.currentTime=0;soundWrong.play().catch(()=>{});}
-    card.scrollIntoView({behavior:"smooth",block:"nearest"});
+    card.scrollIntoView({behavior:"smooth",block:"center"});
   }
 
-  // ✅ แสดงปุ่มอีกครั้งเมื่อจบการเฉลยทั้งหมด
-  topButtons.style.display='flex';
-
-  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-a.group);
+  scoreData=groupScores.map((s,i)=>({group:i+1,score:s||0})).sort((a,b)=>b.score-a.score||a.group-b.group);
   scoreSection.style.display='block';
+  topButtons.style.display='none';
+  footerButtons.style.display='flex';
 };
 
 showScoreBtn.onclick=async()=>{
   pageTitle.style.display='none';
-  topButtons.style.display='none';
   results.style.display='none';
   showScoreBtn.style.display='none';
 
-  scoreTable.innerHTML=`<h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนน 🏆</h2>
-  <table><thead><tr><th>อันดับ</th><th>กลุ่ม</th><th>คะแนน</th></tr></thead><tbody></tbody></table>`;
-  const tbody=scoreTable.querySelector('tbody');
+  scoreTable.innerHTML=`
+    <h2 style="color:var(--highlight);margin-top:10px;">🏆 สรุปผลคะแนนทั้งหมด 🏆</h2>
+    <div id="scoreCards"></div>
+  `;
+  
+  const container=document.getElementById("scoreCards");
+  const icons=["🏆","🥈","🥉"];
 
-  for(const [idx,row] of scoreData.entries()){
-    const tr=document.createElement('tr');
-    tr.className='table-row';
-    tr.innerHTML=`<td>${idx+1}</td><td>${row.group}</td><td>${row.score}</td>`;
-    tbody.appendChild(tr);
-    await wait(700);
-    tr.classList.add('show');
-    soundCorrect.currentTime=0; soundCorrect.play().catch(()=>{});
-    tr.scrollIntoView({behavior:"smooth",block:"nearest"});
-  }
+  container.innerHTML=scoreData.map((row,i)=>{
+    const icon=icons[i]||"⭐";
+    return `
+      <div class="card-result show">
+        <div>
+          <div style="font-size:20px;font-weight:700;">${icon} กลุ่ม ${row.group}</div>
+          <div style="font-size:16px;color:#ddd;">
+            ${row.score>0?'ทำคะแนนได้':'<span style="color:#ff9090;">ไม่พบในลิสต์คำตอบ</span>'}
+          </div>
+        </div>
+        <div class="rank-badge ${row.score===0?'notfound':''}">
+          ${row.score===0?'ไม่พบ':`${row.score} คะแนน`}
+        </div>
+      </div>`;
+  }).join("");
 
   saveContainer.style.display='flex';
   footerButtons.style.display='flex';
+  await wait(500);
+  container.lastElementChild.scrollIntoView({behavior:"smooth",block:"end"});
+  await wait(1000);
 
-  await wait(800);
   leaderboardList.innerHTML=scoreData.slice(0,5).map((r,i)=>
     `<div class='leader-item'>อันดับ ${i+1} — กลุ่ม ${r.group}<span>${r.score} คะแนน</span></div>`).join("");
   leaderboardPopup.style.display='flex';
   soundCorrect.play().catch(()=>{});
 };
 
-closeLeaderboard.onclick=()=>{ leaderboardPopup.style.display='none'; };
+closeLeaderboard.onclick=()=>{leaderboardPopup.style.display='none';};
 </script>
 </body>
 </html>
